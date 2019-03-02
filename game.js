@@ -1,6 +1,8 @@
 var scene, camera, renderer;
 var plotMesh = null;
 var plotWireframe = null;
+var tubeMesh = null;
+var tubeWireframe = null;
 var ambientLight, directionalLight;
 
 $(document).ready(function(){
@@ -21,7 +23,7 @@ $(document).ready(function(){
 function resize(){
 	renderer.setSize(window.innerWidth, window.innerHeight);
 	camera.aspect = window.innerWidth/window.innerHeight;
-	camera.far = 2000;
+	camera.far = 5000;
 	camera.near = 0.1;
 	camera.fov = 90/(window.innerWidth/window.innerHeight)*(16.0/9.0); // left-right fov at 16:9 = 90°
 	camera.updateProjectionMatrix();
@@ -33,7 +35,7 @@ function init(){
 	renderer.setClearColor(new THREE.Color(0), 1);
 		
 	// grid
-	var geometry = new THREE.CylinderGeometry(0.25, 0.25, 100, 8, 1);
+	var geometry = new THREE.CylinderGeometry(0.1, 0.1, 1000, 8, 1);
 	var material = new THREE.MeshLambertMaterial({color:0xcccccc});
 	var axis;
 	// y-axis
@@ -128,29 +130,64 @@ function plot(){
 			vector_index++;
 		}
 	}
-	for(var ix = 0; ix < numSteps.x; ix++){
-		
-	}
-	
-	
-	// create mesh
-/*	var geom = new THREE.Geometry();
-	geom.vertices.push(new THREE.Vector3(0, 2, 0));
-	geom.vertices.push(new THREE.Vector3(5, 2, 0));
-	geom.vertices.push(new THREE.Vector3(5, 2, -5));
-	geom.faces.push(new THREE.Face3(0,1,2));
-	geom.computeFaceNormals();
-	plotMesh = new THREE.Mesh(geom, material);
-	plotMesh.position.x = 0;
-	plotMesh.position.y = 0;
-	plotMesh.position.z = 0; */
 	geometry.computeFaceNormals();
 	plotMesh = new THREE.Mesh(geometry, material);
 	scene.add(plotMesh);
 	var wireframeMaterial = new THREE.MeshBasicMaterial({color:0xFFFFFF, side:THREE.DoubleSide, wireframe:true});
 //	var wireframeGeometry = new THREE.EdgesGeometry(geometry);
 	plotWireframe = new THREE.Mesh(geometry, wireframeMaterial);
-//	scene.add(plotWireframe);
+	// tube
+	var tubeGeometry = new THREE.Geometry();
+	var tubeMaterial = new THREE.MeshLambertMaterial({
+		color:0xffff00, 
+		side:THREE.DoubleSide,
+		polygonOffset: true,
+		polygonOffsetFactor: 1,
+		polygonOffsetUnits: 1
+	});
+	var numAngles = 8;
+	var angle;
+	var radius = 0.125;
+	// precalc angles
+	var angleStep = Math.PI*2/numAngles;
+	var cos = [];
+	var sin = [];
+	for(var ia = 0; ia < numAngles; ia++){
+		angle = ia*angleStep;
+		cos[ia] = Math.cos(angle);
+		sin[ia] = Math.sin(angle);
+	}
+	// generate tube
+	for(var ix = 0; ix < numSteps.x; ix++){
+		x = ix * step.x + offset.x;
+		Complex.set(complex, x, 0);
+		f(result, complex);
+		y = result.r;
+		for(var ia = 0; ia < numAngles; ia++){
+			vector = new THREE.Vector3(x, y+radius*cos[ia], radius*sin[ia]);
+			tubeGeometry.vertices.push(vector);
+		}
+	}
+	var n = tubeGeometry.vertices.length;
+	for(var ia = 1; ia < numAngles-1; ia++){
+		tubeGeometry.faces.push(new THREE.Face3(0, ia, ia+1));
+		tubeGeometry.faces.push(new THREE.Face3(n-1, n-1-ia, n-2-ia));
+	}
+	var off = 0;
+	for(var ix = 0; ix < numSteps.x-1; ix++){
+		for(var ia = 0; ia < numAngles-1; ia++){
+			var i1 = off;
+			var i2 = off+1;
+			var i3 = i1+numAngles;
+			var i4 = i2+numAngles;
+			tubeGeometry.faces.push(new THREE.Face3(i1, i2, i3));
+			tubeGeometry.faces.push(new THREE.Face3(i2, i3, i4));
+			off++;
+		}
+	}
+	tubeGeometry.computeFaceNormals();
+	tubeMesh = new THREE.Mesh(tubeGeometry, tubeMaterial);
+	scene.add(tubeMesh);
 }
 
 var z = {
@@ -158,17 +195,17 @@ var z = {
 };
 function f(out, complex){
 	// y=a*x^2
-//	Complex.set(out, complex.r, complex.i); // out=z
-//	Complex.multiply(out, out); // out=z*z
-//	Complex.multiply(out, z.a); // out=z*z*a
+	Complex.set(out, complex.r, complex.i); // out=z
+	Complex.multiply(out, out); // out=z*z
+	Complex.multiply(out, z.a); // out=z*z*a
 	// y=x
 //	Complex.set(out, complex.r, complex.i); // out=z
 	// y=sin(x)
 //	Complex.sin(out, complex); // out=sin(z)
 //	out.r *= 0.1;
 	// y=cos(x)
-	Complex.cos(out, complex); // out=cos(z)
-	out.r *= 0.5;
+//	Complex.cos(out, complex); // out=cos(z)
+//	out.r *= 0.5;
 	// return
 	return out.r;
 }
