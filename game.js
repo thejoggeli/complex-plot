@@ -84,8 +84,8 @@ function plot(){
 	var min_x = -20;
 	var max_x = 20;
 	// imaginary plot
-	var min_z = -10;
-	var max_z = 10;
+	var min_z = -2.5;
+	var max_z = 2.5;
 	// objects
 	var min = {x:min_x, z:min_z};
 	var max = {x:max_x, z:max_z};	
@@ -111,12 +111,14 @@ function plot(){
 	var vector_index = 0;
 	var x, y, z, vector;
 	var complex = Complex.create();
+	var result = Complex.create();
 	for(var ix = 0; ix < numSteps.x; ix++){
 		for(var iz = 0; iz < numSteps.z; iz++){
 			x = ix * step.x + offset.x;
 			z = iz * step.z + offset.z;
 			Complex.set(complex, x, z);
-			y = f(complex);
+			f(result, complex);
+			y = result.r;
 			vector = new THREE.Vector3(x*scale.x, y*scale.y, z*scale.z);
 			geometry.vertices.push(vector);
 			if(ix > 0 && iz > 0){
@@ -154,18 +156,18 @@ function plot(){
 var z = {
 	a: Complex.create(0.5, 0),
 };
-function f(complex){
-	var out = Complex.create(complex.r, complex.i);
+function f(out, complex){
 	// y=a*x^2
-//	Complex.multiply(out, z.a);
-//	Complex.multiply(out, out);
+//	Complex.set(out, complex.r, complex.i); // out=z
+//	Complex.multiply(out, out); // out=z*z
+//	Complex.multiply(out, z.a); // out=z*z*a
 	// y=x
-//	Complex.set(out, complex.r, complex.i);
+//	Complex.set(out, complex.r, complex.i); // out=z
 	// y=sin(x)
-//	Complex.sin(out, complex);
+//	Complex.sin(out, complex); // out=sin(z)
 //	out.r *= 0.1;
 	// y=cos(x)
-	Complex.cos(out, complex);
+	Complex.cos(out, complex); // out=cos(z)
 	out.r *= 0.5;
 	// return
 	return out.r;
