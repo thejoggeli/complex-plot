@@ -71,8 +71,6 @@ Plotter.plot = function(expression){
 		Plotter.areaResults = [];
 		Plotter.lineResults = [];
 				
-		var contains_z = Plotter.expression.toLowerCase().indexOf("z") !== -1;
-				
 		// num steps
 		var numSteps = {};
 		numSteps.x = (Plotter.bounds.max_x-Plotter.bounds.min_x)/Plotter.quadSize.x+1;
@@ -81,40 +79,46 @@ Plotter.plot = function(expression){
 		var offset = {};
 		offset.x = Plotter.bounds.min_x;
 		offset.z = Plotter.bounds.min_z;
-		Plotter.precalc(numSteps, offset, contains_z);	
-		if(contains_z) Plotter.plotArea(numSteps, offset);
+		var isComplex = Plotter.precalc(numSteps, offset);
+		console.log("isComplex: " + isComplex);
+		if(isComplex) Plotter.plotArea(numSteps, offset);
 		Plotter.plotLine(numSteps, offset);
 	} catch(e){
+		console.log(e);
 		return false;
 	}
 	return true;
 }
 
-Plotter.precalc = function(numSteps, offset, complex){
-	if(complex){		
-		var ex = Plotter.expression.replace(/z/g, "(x+z*i)");
-		const expr = math.compile(ex);
-		var x, z;
-		for(var ix = 0; ix < numSteps.x; ix++){
-			Plotter.areaResults[ix] = [];
-			for(var iz = 0; iz < numSteps.z; iz++){
-				x = ix * Plotter.quadSize.x + offset.x;
-				z = iz * Plotter.quadSize.z + offset.z;
-				Plotter.areaResults[ix][iz] = expr.eval({x:x, z:z});
+Plotter.precalc = function(numSteps, offset){
+	var isComplex = false;
+	var ex = Plotter.expression.replace(/c/g, "(x+z)");
+	ex = ex.replace(/z/g, "z*i");
+	const expr = math.compile(ex);
+	var x, z, res;
+	for(var ix = 0; ix < numSteps.x; ix++){
+		Plotter.areaResults[ix] = [];
+		for(var iz = 0; iz < numSteps.z; iz++){
+			x = ix * Plotter.quadSize.x + offset.x;
+			z = iz * Plotter.quadSize.z + offset.z;
+			Plotter.areaResults[ix][iz] = expr.eval({x:x, z:z});
+			if(Plotter.areaResults[ix][iz].re !== undefined){
+				isComplex = true;
+			} else {
+				Plotter.areaResults[ix][iz] = {re: Plotter.areaResults[ix][iz], im: 0};
 			}
 		}
-		for(var ix = 0; ix < numSteps.x; ix++){
-			x = ix * Plotter.quadSize.x + offset.x;
-			Plotter.lineResults[ix] = expr.eval({x:x, z:0});
-		}
-	} else {		
-		const expr = math.compile(Plotter.expression);
-		var x;
-		for(var ix = 0; ix < numSteps.x; ix++){
-			x = ix * Plotter.quadSize.x + offset.x;
-			Plotter.lineResults[ix] = {re:expr.eval({x:x})};
-		}
+	}	
+	for(var ix = 0; ix < numSteps.x; ix++){
+		x = ix * Plotter.quadSize.x + offset.x;
+		Plotter.lineResults[ix] = expr.eval({x:x, z:0});
+		if(Plotter.lineResults[ix].re !== undefined){
+			isComplex = true;
+		} else {
+			Plotter.lineResults[ix] = {re: Plotter.lineResults[ix], im: 0};
+		} 
 	}
+	return isComplex;
 }
 
 Plotter.plotArea = function(numSteps, offset){
@@ -161,6 +165,7 @@ Plotter.plotArea = function(numSteps, offset){
 	bufferGeometry.addAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
 	bufferGeometry.addAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
 	bufferGeometry.addAttribute('imaginary', new THREE.Float32BufferAttribute(imaginaries, 1));
+	console.log("i min,max = " + min_i + "," + max_i); 
 	bufferGeometry.computeVertexNormals();
 	bufferGeometry.normalizeNormals();
 	// plot material

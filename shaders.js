@@ -298,14 +298,21 @@ void main() {
 	#include <clipping_planes_fragment>
 	
 	// float hue = mod(vCustomWorldPosition.y * 0.01, 1.0);
-	float hue = 0.333/2.0;
-	float sat = 1.0;
-	if(vImaginary > 0.0){
-		hue -= vImaginary/max_plot_i*(0.333/2.0);
-	} else {
-		hue += vImaginary/min_plot_i*(0.333/2.0);
+	float hue, sat, lig;
+	if(max_plot_i == 0.0 && min_plot_i == 0.0){
+		hue = 0.333/2.0;
+		sat = 1.0;
+		lig = 0.35;
+	} else {	
+		hue = 0.333/2.0;
+		sat = 1.0;
+		if(vImaginary > 0.0){
+			hue += vImaginary/max_plot_i*(0.333/2.0);
+		} else {
+			hue -= vImaginary/min_plot_i*(0.333/2.0);
+		}
+		lig = 0.35; // sat*0.5;
 	}
-	float lig = 0.35; // sat*0.5;
 	vec4 diffuseColor = vec4(hsl2rgb(vec3(hue, sat, lig)), opacity);
 	
 	ReflectedLight reflectedLight = ReflectedLight( vec3( 0.0 ), vec3( 0.0 ), vec3( 0.0 ), vec3( 0.0 ) );

@@ -3,7 +3,7 @@ Ui.init = function(){
 	$(".plot-it").on("click", function(){
 		Ui.beginPlot();
 	});
-	$(".expression-input").on("keydown", function(e){
+	$("#ui-1 input[type=text]").on("keydown", function(e){
 		if(e.keyCode == 13){
 			Ui.beginPlot();
 		}
