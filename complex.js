@@ -2,6 +2,14 @@ function Complex(r, i){
 	this.r = r;
 	this.i = i;
 }
+Complex.prototype.set = function(r,i){
+	this.r = r;
+	this.i = i;
+}
+Complex.prototype.copy = function(z){
+	this.r = z.r;
+	this.i = z.i;
+}
 Complex.create = function(r, i){
 	return new Complex(r === undefined ? 0 : r, i === undefined ? 0 : i);
 }
@@ -10,26 +18,26 @@ Complex.set = function(out, r, i){
 	out.i = i;
 	return out;	
 }
-Complex.add = function(out, z){
-	out.r += z.r;
-	out.i += z.i;
+Complex.add = function(out, z1, z2){
+	out.r = z1.r + z2.r;
+	out.i = z1.i + z2.i;
 	return out;	
 }
-Complex.subtract = function(out, z){
-	out.r -= z.r;
-	out.i -= z.i;
+Complex.subtract = function(out, z1, z2){
+	out.r = z1.r - z2.r;
+	out.i = z1.i - z2.i;
 	return out;	
 }
-Complex.multiply = function(out, z){
-	var r = out.r*z.r-out.i*z.i;
-	var i = out.r*z.i+out.i*z.r;
+Complex.multiply = function(out, z1, z2){
+	var r = z1.r*z2.r-z1.i*z2.i;
+	var i = z1.r*z2.i+z1.i*z2.r;
 	out.r = r;
 	out.i = i;
 	return out;	
 }
-Complex.divide = function(out, z){	
-	var r = out.r*z.r-out.i*z.i;
-	var i = out.r*z.i+out.i*z.r;
+Complex.divide = function(out, z1, z2){	
+	var r = z1.r*z2.r-z1.i*z2.i;
+	var i = z1.r*z2.i+z1.i*z2.r;
 	out.r = r;
 	out.i = i;
 	return out;	
