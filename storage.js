@@ -45,7 +45,7 @@ Storage.window = {
 		} else {
 			return json[key];
 		}
-	},	
+	},
 };
 
 	

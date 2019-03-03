@@ -98,11 +98,32 @@ Plotter.plot = function(expression){
 		} 
 		Plotter.plotArea(numSteps, offset);		
 		Plotter.plotLine(numSteps, offset);	
+		Plotter.applyLineColor();
+		Plotter.applyAreaColor();
 	} catch(e){
 		console.error(e);
 		return false;
 	}
 	return true;
+}
+
+Plotter.setLineColor = function(hue){
+	Plotter.lineColor = hue;
+	Plotter.applyLineColor();
+}
+Plotter.applyLineColor = function(){
+	if(Plotter.lineMesh !== null){
+		Plotter.lineMesh.material.color.setHex(Colors.hslToHexInt(Plotter.lineColor, 1, 0.45));
+	}
+}
+Plotter.setAreaColor = function(hue){
+	Plotter.areaColor = hue;
+	Plotter.applyAreaColor();
+}
+Plotter.applyAreaColor = function(hue){
+	if(Plotter.areaMesh !== null){
+		Plotter.areaMesh.material.uniforms.hue_offset.value = Plotter.areaColor;
+	}
 }
 
 Plotter.setShowLineWireframe = function(v){
@@ -262,6 +283,7 @@ Plotter.plotArea = function(numSteps, offset){
 		uniforms["min_plot_y"] = {value:min_y};
 		uniforms["max_plot_y"] = {value:max_y};
 		uniforms["plot_y_range"] = {value:max_y-min_y};
+		uniforms["hue_offset"] = {value:Plotter.areaColor};
 		material = new THREE.ShaderMaterial({
 			defines: {},
 			uniforms: uniforms,
@@ -283,6 +305,7 @@ Plotter.plotArea = function(numSteps, offset){
 		uniforms["min_plot_i"] = {value:min_i};
 		uniforms["max_plot_i"] = {value:max_i};
 		uniforms["plot_i_range"] = {value:max_i-min_i};
+		uniforms["hue_offset"] = {value:Plotter.areaColor};
 		material = new THREE.ShaderMaterial({
 			defines: {},
 			uniforms: uniforms,
@@ -321,7 +344,7 @@ Plotter.plotLine = function(numSteps, offset){
 	// tube
 	var tubeGeometry = new THREE.Geometry();
 	var tubeMaterial = new THREE.MeshLambertMaterial({
-		color:0x00eeee, 
+		color: 0xFF0000,
 		side:THREE.DoubleSide,
 		polygonOffset: true,
 		polygonOffsetFactor: 1,

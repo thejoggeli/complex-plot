@@ -96,6 +96,7 @@ uniform float plot_y_range;
 #include <clipping_planes_pars_fragment>
 
 vec3 hsl2rgb(vec3 hsl);
+uniform float hue_offset;
 
 void main() {
 
@@ -116,7 +117,7 @@ void main() {
 		}
 		lig = 0.35; // sat*0.5;
 	}
-	vec4 diffuseColor = vec4(hsl2rgb(vec3(hue, sat, lig)), opacity);
+	vec4 diffuseColor = vec4(hsl2rgb(vec3(hue+hue_offset, sat, lig)), opacity);
 	
 	ReflectedLight reflectedLight = ReflectedLight( vec3( 0.0 ), vec3( 0.0 ), vec3( 0.0 ), vec3( 0.0 ) );
 	vec3 totalEmissiveRadiance = emissive;
@@ -310,6 +311,7 @@ vec3 hsl2rgb(vec3 hsl);
 uniform float min_plot_i;
 uniform float max_plot_i;
 uniform float plot_i_range;
+uniform float hue_offset;
 
 void main() {
 
@@ -331,7 +333,7 @@ void main() {
 		}
 		lig = 0.35; // sat*0.5;
 	}
-	vec4 diffuseColor = vec4(hsl2rgb(vec3(hue, sat, lig)), opacity);
+	vec4 diffuseColor = vec4(hsl2rgb(vec3(hue+hue_offset, sat, lig)), opacity);
 	
 	ReflectedLight reflectedLight = ReflectedLight( vec3( 0.0 ), vec3( 0.0 ), vec3( 0.0 ), vec3( 0.0 ) );
 	vec3 totalEmissiveRadiance = emissive;

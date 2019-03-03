@@ -38,6 +38,20 @@ Ui.init = function(){
 		Plotter.setShowArea($(this).hasClass("active"));
 		Ui.toCookie();
 	});
+	$(".line-color").on("change", function(){
+		Plotter.setLineColor($(this).val());
+		Ui.toCookie();
+	});
+	$(".area-color").on("change", function(){
+		Plotter.setAreaColor($(this).val());
+		Ui.toCookie();		
+	});
+	$(".line-color").on("input", function(){
+		Plotter.setLineColor($(this).val());
+	});
+	$(".area-color").on("input", function(){
+		Plotter.setAreaColor($(this).val());
+	});
 	$(".plot-real").on("click", function(){
 		$(".plot-real").addClass("active");
 		$(".plot-complex").removeClass("active");
@@ -59,6 +73,8 @@ Ui.updateValues = function(){
 	} else {
 		$(".plot-complex").trigger("click");				
 	}
+	$(".line-color").val(Plotter.lineColor);
+	$(".area-color").val(Plotter.areaColor);
 	$(".line-width").val(Plotter.lineWidth);
 	$(".line-min-x").val(Plotter.bounds.min_x);
 	$(".line-max-x").val(Plotter.bounds.max_x);
@@ -98,6 +114,9 @@ Ui.applyValues = function(){
 	Plotter.bounds.max_x = parseFloat($("input.max-x").val());
 	Plotter.bounds.min_z = parseFloat($("input.min-z").val());
 	Plotter.bounds.max_z = parseFloat($("input.max-z").val());
+	Plotter.setLineColor($(".line-color").val());
+	Plotter.setAreaColor($(".area-color").val());
+	Plotter.bounds.max_z = parseFloat($("input.max-z").val());
 	Grid.scale.x = parseFloat($("input.x-scale").val());
 	Grid.scale.y = parseFloat($("input.y-scale").val());
 	Grid.scale.z = parseFloat($("input.z-scale").val());
@@ -133,7 +152,7 @@ Ui.toggles = [
 	"show-area",
 ];
 Ui.fromCookie = function(){
-	$("#ui-1 input[type=text").each(function(){
+	$("#ui-1 input[type=text], #ui-1 input[type=range]").each(function(){
 		var name = "ui-" + $(this).attr("name");
 		var val = Storage.window.get(name, null);
 		if(val !== null){
@@ -152,7 +171,6 @@ Ui.fromCookie = function(){
 		var name = "ui-" + Ui.toggles[t];
 		var val = Storage.window.get(name, null);
 		if(val !== null){
-			console.log(name, val);
 			if(val){
 				$("."+Ui.toggles[t]).addClass("active");
 			} else {
@@ -162,7 +180,7 @@ Ui.fromCookie = function(){
 	}
 }
 Ui.toCookie = function(){
-	$("#ui-1 input[type=text").each(function(){
+	$("#ui-1 input[type=text], #ui-1 input[type=range]").each(function(){
 		var name = "ui-" + $(this).attr("name");
 		var val = $(this).val();
 		Storage.window.set(name, $(this).val());

@@ -850,7 +850,11 @@ Colors.b255 = 0;
 Colors.a255 = 0;
 
 Colors.rgbToHex = function(r, g, b) {
-	return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+	return "#" + Colors.componentToHex(r) + Colors.componentToHex(g) + Colors.componentToHex(b);
+}
+
+Colors.rgbToHexInt = function(r, g, b) {
+	return (r << 16) + (g << 8) + b;
 }
 
 // helper function for rgbToHex()
@@ -860,9 +864,15 @@ Colors.componentToHex = function(c) {
 }
 
 Colors.hslToHex = function(h, s, l){
-	hslToRgb(h,s,l);
-	rgbTo255(Colors.r, Colors.g, Colors.b);
-	return rgbToHex(Colors.r255, Colors.g255, Colors.b255);
+	Colors.hslToRgb(h,s,l);
+	Colors.rgbTo255(Colors.r, Colors.g, Colors.b);
+	return Colors.rgbToHex(Colors.r255, Colors.g255, Colors.b255);
+}
+
+Colors.hslToHexInt = function(h, s, l){
+	Colors.hslToRgb(h,s,l);
+	Colors.rgbTo255(Colors.r, Colors.g, Colors.b);
+	return Colors.rgbToHexInt(Colors.r255, Colors.g255, Colors.b255);
 }
 
 /*
