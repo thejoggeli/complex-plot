@@ -138,9 +138,11 @@ Plotter.setMode = function(mode){
 
 Plotter.precalc = function(numSteps, offset){
 	Plotter.resultIsComplex = false;
+	Plotter.hasZ = false;
 	var ex = Plotter.expression;
+	ex = ex.toLowerCase();
 	if(Plotter.mode == "real"){
-		// nothing to do		
+		// nothing
 	} else {
 		ex = ex.replace(/cos/g, "COS");
 		ex = ex.replace(/c/g, "(x+z)");
@@ -209,6 +211,8 @@ Plotter.plotArea = function(numSteps, offset){
 				vector_index++;
 			}
 		}
+		min_y *= Grid.scale.y;
+		max_y *= Grid.scale.y;
 	} else {
 		max_i = -Infinity;
 		min_i = Infinity;

@@ -107,7 +107,6 @@ Ui.beginPlot = function(){
 	}
 }
 
-
 Ui.toggles = [
 	"line-wireframe",
 	"area-wireframe",
@@ -142,7 +141,7 @@ Ui.fromCookie = function(){
 		}
 	}
 }
-Ui.toCookie = function(){	
+Ui.toCookie = function(){
 	$("#ui-1 input[type=text").each(function(){
 		var name = "ui-" + $(this).attr("name");
 		var val = $(this).val();
