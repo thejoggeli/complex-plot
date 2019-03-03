@@ -54,6 +54,10 @@ function Plotter(){}
 Plotter.expression = "sin(z)";
 Plotter.areaMesh = null;
 Plotter.lineMesh = null;
+Plotter.areaWireframe = null;
+Plotter.lineWireframe = null;
+Plotter.showAreaWireframe = false;
+Plotter.showLineWireframe = false;
 Plotter.areaResults;
 Plotter.lineResults;
 Plotter.bounds = {
@@ -66,8 +70,12 @@ Plotter.plot = function(expression){
 		Plotter.expression = expression;	
 		if(Plotter.areaMesh != null) scene.remove(Plotter.areaMesh); 
 		if(Plotter.lineMesh != null) scene.remove(Plotter.lineMesh);
+		if(Plotter.areaWireframe != null) scene.remove(Plotter.areaWireframe); 
+		if(Plotter.showLineWireframe != null) scene.remove(Plotter.lineWireframe);
 		Plotter.areaMesh = null;
 		Plotter.lineMesh = null;	
+		Plotter.areaWireframe = null;
+		Plotter.lineWireframe = null;
 		Plotter.areaResults = [];
 		Plotter.lineResults = [];
 				
@@ -90,10 +98,32 @@ Plotter.plot = function(expression){
 	return true;
 }
 
+Plotter.setShowLineWireframe = function(v){
+	if(v == Plotter.showLineWireframe) return;
+	Plotter.showLineWireframe = v;
+	if(Plotter.showLineWireframe & Plotter.lineWireframe != null){
+		scene.add(Plotter.lineWireframe);
+	} else if(!Plotter.showLineWireframe & Plotter.lineWireframe != null){
+		scene.remove(Plotter.lineWireframe);		
+	}
+}
+Plotter.setShowAreaWireframe = function(v){
+	if(v == Plotter.showAreaWireframe) return;
+	Plotter.showAreaWireframe = v;
+	if(Plotter.showAreaWireframe & Plotter.areaWireframe != null){
+		scene.add(Plotter.areaWireframe);
+	} else if(!Plotter.showAreaWireframe & Plotter.areaWireframe != null){
+		scene.remove(Plotter.areaWireframe);		
+	}	
+}
+
 Plotter.precalc = function(numSteps, offset){
 	var isComplex = false;
-	var ex = Plotter.expression.replace(/c/g, "(x+z)");
+	var ex = Plotter.expression;
+	ex = ex.replace(/cos/g, "COS");
+	ex = ex.replace(/c/g, "(x+z)");
 	ex = ex.replace(/z/g, "z*i");
+	ex = ex.toLowerCase();
 	const expr = math.compile(ex);
 	var x, z, res;
 	for(var ix = 0; ix < numSteps.x; ix++){
@@ -190,9 +220,13 @@ Plotter.plotArea = function(numSteps, offset){
 	plotMesh = new THREE.Mesh(bufferGeometry, material);	
 	scene.add(plotMesh);
 	Plotter.areaMesh = plotMesh;
-//	var wireframeMaterial = new THREE.MeshBasicMaterial({color:0xFFFFFF, side:THREE.DoubleSide, wireframe:true});
-//	var wireframeGeometry = new THREE.EdgesGeometry(geometry);
-//	plotWireframe = new THREE.Mesh(geometry, wireframeMaterial);
+	// wireframe
+	var wireframeMaterial = new THREE.MeshBasicMaterial({color:0xFFFFFF, side:THREE.DoubleSide, wireframe:true});
+	var wireframe = new THREE.Mesh(bufferGeometry, wireframeMaterial);
+	if(Plotter.showAreaWireframe){		
+		scene.add(wireframe);
+	}
+	Plotter.areaWireframe = wireframe;
 }
 
 Plotter.plotLine = function(numSteps, offset){	
@@ -252,5 +286,12 @@ Plotter.plotLine = function(numSteps, offset){
 	tubeMesh = new THREE.Mesh(tubeGeometry, tubeMaterial);
 	scene.add(tubeMesh);
 	Plotter.lineMesh = tubeMesh;
+	// wireframe
+	var wireframeMaterial = new THREE.MeshBasicMaterial({color:0xFFFFFF, side:THREE.DoubleSide, wireframe:true});
+	var wireframe = new THREE.Mesh(tubeGeometry, wireframeMaterial);
+	if(Plotter.showLineWireframe){
+		scene.add(wireframe);
+	}
+	Plotter.lineWireframe = wireframe;
 }
-	
+

@@ -19,6 +19,14 @@ Ui.init = function(){
 		$("#ui-1 .minimize").show();
 		$("#ui-1 .category").show();		
 	});
+	$(".line-wireframe").on("click", function(){
+		$(this).toggleClass("active");
+		Plotter.setShowLineWireframe($(this).hasClass("active"));
+	});
+	$(".area-wireframe").on("click", function(){
+		$(this).toggleClass("active");
+		Plotter.setShowAreaWireframe($(this).hasClass("active"));
+	});
 }
 
 Ui.applyValues = function(){
@@ -31,6 +39,8 @@ Ui.applyValues = function(){
 	Grid.scale.z = parseFloat($("input.z-scale").val());
 	var f = parseFloat($("input.quad-size").val());
 	Plotter.quadSize.x = Plotter.quadSize.z = f;	
+	Plotter.setShowLineWireframe($(".line-wireframe").hasClass("active"));
+	Plotter.setShowAreaWireframe($(".area-wireframe").hasClass("active"));
 }
 
 

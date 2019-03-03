@@ -18,13 +18,17 @@
 #ui-1 .title {background:black;color:white;padding:5px;margin-bottom:2px;font-weight:bold;}
 #ui-1 .row {padding:2px 5px;box-sizing:border-box;font-size:0;}
 #ui-1 .row .label {width:76px;display:inline-block;color:black;font-size:12px;}
-#ui-1 .input-row-1 input {width:112px;}
+#ui-1 .input-row-1 input {width:114px;}
+#ui-1 .input-row-2 button,
 #ui-1 .input-row-2 input {width:55px;text-align:center;}
 #ui-1 .input-row-2 .input-1 {margin-right:4px;}
-#ui-1 .input-row-3 input {width:60px;margin-right:4px;text-align:center;}
+#ui-1 .input-row-3 input {width:60px;margin-right:5px;text-align:center;}
 #ui-1 .input-row-3 .input-3 {margin-right:0;}
 #ui-1 .expression-row input {width:100%;}
 #ui-1 .plotit-row button {width:100%;}
+
+#ui-1 .toggle-button.active {opacity:1;}
+#ui-1 .toggle-button:not(.active) {opacity:0.5;}
 
 #ui-1 .maximize {display:none}
 #ui-1 .minimize, 
