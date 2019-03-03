@@ -76,8 +76,6 @@ Ui.init = function(){
 		Ui.beginPlot();
 	});
 	Ui.fromCookie();
-	$(".complex-1").show();
-	$(".complex-2").hide();	
 }
 
 Ui.updateValues = function(){
@@ -199,6 +197,14 @@ Ui.fromCookie = function(){
 			}
 		}
 	}
+	var flip = Storage.window.get("ui-flip-complex", false);
+	if(flip){
+		$(".complex-1").hide();
+		$(".complex-2").show();			
+	} else {		
+		$(".complex-1").show();
+		$(".complex-2").hide();	
+	}
 }
 Ui.toCookie = function(){
 	$("#ui-1 input[type=text], #ui-1 input[type=range]").each(function(){
@@ -212,5 +218,6 @@ Ui.toCookie = function(){
 		var val = $("."+Ui.toggles[t]).hasClass("active");
 		Storage.window.set(name, val);
 	}
+	Storage.window.set("ui-flip-complex", Plotter.flipComplex);
 }
 

@@ -84,12 +84,7 @@ Plotter.plot = function(expression){
 		Plotter.lineWireframe = null;
 		Plotter.areaResults = [];
 		Plotter.lineResults = [];
-		
-		if(Plotter.mode == "real"){
-			Plotter.flipComplex = false;
-		}
-		console.log("Flip: " + Plotter.flipComplex);
-				
+						
 		// num steps
 		var numSteps = {};
 		numSteps.x = (Plotter.bounds.max_x-Plotter.bounds.min_x)/Plotter.quadSize.x+1;
@@ -209,7 +204,7 @@ Plotter.precalc = function(numSteps, offset){
 			Plotter.lineResults[ix] = {re: Plotter.lineResults[ix], im: 0};
 		} 
 	}
-	if(Plotter.flipComplex){
+	if(Plotter.flipComplex && Plotter.mode == "complex"){
 		var tmp;
 		for(var ix = 0; ix < numSteps.x; ix++){
 			for(var iz = 0; iz < numSteps.z; iz++){
