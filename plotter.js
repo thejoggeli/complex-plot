@@ -52,6 +52,7 @@ Grid.build = function(){
 
 function Plotter(){}
 Plotter.mode = "complex";
+Plotter.flipComplex = false;
 Plotter.resultIsComplex = false;
 Plotter.lineWidth;
 Plotter.expression = "sin(z)";
@@ -83,6 +84,11 @@ Plotter.plot = function(expression){
 		Plotter.lineWireframe = null;
 		Plotter.areaResults = [];
 		Plotter.lineResults = [];
+		
+		if(Plotter.mode == "real"){
+			Plotter.flipComplex = false;
+		}
+		console.log("Flip: " + Plotter.flipComplex);
 				
 		// num steps
 		var numSteps = {};
@@ -203,6 +209,14 @@ Plotter.precalc = function(numSteps, offset){
 			Plotter.lineResults[ix] = {re: Plotter.lineResults[ix], im: 0};
 		} 
 	}
+	if(Plotter.flipComplex){
+		var tmp;
+		for(var ix = 0; ix < numSteps.x; ix++){
+			tmp = Plotter.lineResults[ix].re;
+			Plotter.lineResults[ix].re =  Plotter.lineResults[ix].im;
+			Plotter.lineResults[ix].im = tmp;
+		}
+	}
 }
 
 Plotter.plotArea = function(numSteps, offset){
@@ -247,30 +261,57 @@ Plotter.plotArea = function(numSteps, offset){
 		max_i = -Infinity;
 		min_i = Infinity;
 		var im;
-		for(var ix = 0; ix < numSteps.x; ix++){
-			for(var iz = 0; iz < numSteps.z; iz++){
-				// xz
-				x = ix * Plotter.quadSize.x + offset.x;
-				z = iz * Plotter.quadSize.z + offset.z;			
-				// real
-				y = Plotter.areaResults[ix][iz].re;			
-				// imaginary 
-				im = Plotter.areaResults[ix][iz].im;
-				imaginaries.push(im);
-				if(im < min_i) min_i = im;
-				if(im > max_i) max_i = im;			
-				// vertices, colors, normals
-				vertices.push(x*scale.x, y*scale.y, z*scale.z);
-				colors.push(1.0, 0.0, 0.0);
-				normals.push(0,0,0);			
-				// faces
-				if(ix > 0 && iz > 0){
-					indices.push(vector_index, vector_index-numSteps.z, vector_index-numSteps.z-1);
-					indices.push(vector_index, vector_index-numSteps.z-1, vector_index-1);
+		if(!Plotter.flipComplex){
+			for(var ix = 0; ix < numSteps.x; ix++){
+				for(var iz = 0; iz < numSteps.z; iz++){
+					// xz
+					x = ix * Plotter.quadSize.x + offset.x;
+					z = iz * Plotter.quadSize.z + offset.z;			
+					// real
+					y = Plotter.areaResults[ix][iz].re;			
+					// imaginary 
+					im = Plotter.areaResults[ix][iz].im;
+					imaginaries.push(im);
+					if(im < min_i) min_i = im;
+					if(im > max_i) max_i = im;			
+					// vertices, colors, normals
+					vertices.push(x*scale.x, y*scale.y, z*scale.z);
+					colors.push(1.0, 0.0, 0.0);
+					normals.push(0,0,0);			
+					// faces
+					if(ix > 0 && iz > 0){
+						indices.push(vector_index, vector_index-numSteps.z, vector_index-numSteps.z-1);
+						indices.push(vector_index, vector_index-numSteps.z-1, vector_index-1);
+					}
+					vector_index++;
 				}
-				vector_index++;
-			}
-		}		
+			}			
+		} else {
+			for(var ix = 0; ix < numSteps.x; ix++){
+				for(var iz = 0; iz < numSteps.z; iz++){
+					// xz
+					x = ix * Plotter.quadSize.x + offset.x;
+					z = iz * Plotter.quadSize.z + offset.z;			
+					// real
+					y = Plotter.areaResults[ix][iz].im;			
+					// imaginary 
+					im = Plotter.areaResults[ix][iz].re;
+					imaginaries.push(im);
+					if(im < min_i) min_i = im;
+					if(im > max_i) max_i = im;			
+					// vertices, colors, normals
+					vertices.push(x*scale.x, y*scale.y, z*scale.z);
+					colors.push(1.0, 0.0, 0.0);
+					normals.push(0,0,0);			
+					// faces
+					if(ix > 0 && iz > 0){
+						indices.push(vector_index, vector_index-numSteps.z, vector_index-numSteps.z-1);
+						indices.push(vector_index, vector_index-numSteps.z-1, vector_index-1);
+					}
+					vector_index++;
+				}
+			}			
+		}
 		console.log("i min,max = " + min_i + "," + max_i); 
 	}
 	// plot geometry

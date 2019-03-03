@@ -29,6 +29,8 @@
 #ui-1 .input-row-3 .input-3 {margin-right:0;}
 #ui-1 .expression-row input {width:100%;}
 #ui-1 .plotit-row button {width:100%;}
+#ui-1 .flip-complex-row {margin-bottom:2px;}
+#ui-1 .flip-complex-row button {width:100%;}
 #ui-1 .line-width {text-align:center;}
 
 #ui-1 .range-row {position:relative;}

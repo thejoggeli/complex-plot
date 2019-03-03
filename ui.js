@@ -64,10 +64,30 @@ Ui.init = function(){
 		$(".real").hide();
 		$(".complex").show();
 	});
+	$(".flip-complex").on("click", function(){
+		Plotter.flipComplex = !Plotter.flipComplex;
+		if(Plotter.flipComplex){
+			$(".complex-1").hide();
+			$(".complex-2").show();
+		} else {
+			$(".complex-1").show();
+			$(".complex-2").hide();			
+		}
+		Ui.beginPlot();
+	});
 	Ui.fromCookie();
+	$(".complex-1").show();
+	$(".complex-2").hide();	
 }
 
 Ui.updateValues = function(){
+	if(Plotter.flipComplex){
+		$(".complex-1").hide();
+		$(".complex-2").show();
+	} else {
+		$(".complex-1").show();
+		$(".complex-2").hide();			
+	}
 	if(Plotter.mode == "real"){
 		$(".plot-real").trigger("click");		
 	} else {
@@ -108,6 +128,7 @@ Ui.updateValues = function(){
 
 Ui.applyValues = function(){
 	var mode = $(".plot-real").hasClass("active") ? "real" : "complex";
+	Plotter.flipComplex = $(".complex-2").is(":visible");
 	Plotter.setMode(mode);	
 	Plotter.lineWidth = parseFloat($(".line-width").val());
 	Plotter.bounds.min_x = parseFloat($("input.min-x").val());
