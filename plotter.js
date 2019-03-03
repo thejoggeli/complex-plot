@@ -96,9 +96,7 @@ Plotter.plot = function(expression){
 		if(Plotter.mode == "real" && Plotter.resultIsComplex){
 			return false;
 		} 
-		if(Plotter.mode == "real" || Plotter.mode == "complex" && Plotter.resultIsComplex){
-			Plotter.plotArea(numSteps, offset);
-		}
+		Plotter.plotArea(numSteps, offset);		
 		Plotter.plotLine(numSteps, offset);	
 	} catch(e){
 		console.error(e);
