@@ -27,9 +27,14 @@ Ui.init = function(){
 		$(this).toggleClass("active");
 		Plotter.setShowAreaWireframe($(this).hasClass("active"));
 	});
+	$(".show-line").on("click", function(){
+		$(this).toggleClass("active");
+		Plotter.setShowLine($(this).hasClass("active"));
+	});
 }
 
 Ui.applyValues = function(){
+	Plotter.lineWidth = parseFloat($(".line-width").val());
 	Plotter.bounds.min_x = parseFloat($("input.min-x").val());
 	Plotter.bounds.max_x = parseFloat($("input.max-x").val());
 	Plotter.bounds.min_z = parseFloat($("input.min-z").val());
@@ -40,6 +45,8 @@ Ui.applyValues = function(){
 	var f = parseFloat($("input.quad-size").val());
 	Plotter.quadSize.x = Plotter.quadSize.z = f;	
 	Plotter.setShowLineWireframe($(".line-wireframe").hasClass("active"));
+	Plotter.setShowAreaWireframe($(".area-wireframe").hasClass("active"));
+	Plotter.setShowLine($(".show-line").hasClass("active"));
 	Plotter.setShowAreaWireframe($(".area-wireframe").hasClass("active"));
 }
 

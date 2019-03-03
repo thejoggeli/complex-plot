@@ -51,6 +51,7 @@ Grid.build = function(){
 }
 
 function Plotter(){}
+Plotter.lineWidth;
 Plotter.expression = "sin(z)";
 Plotter.areaMesh = null;
 Plotter.lineMesh = null;
@@ -114,6 +115,15 @@ Plotter.setShowAreaWireframe = function(v){
 		scene.add(Plotter.areaWireframe);
 	} else if(!Plotter.showAreaWireframe & Plotter.areaWireframe != null){
 		scene.remove(Plotter.areaWireframe);		
+	}	
+}
+Plotter.setShowLine = function(v){
+	if(v == Plotter.showLine) return;
+	Plotter.showLine = v;
+	if(Plotter.showLine & Plotter.lineMesh != null){
+		scene.add(Plotter.lineMesh);
+	} else if(!Plotter.showLine & Plotter.lineMesh != null){
+		scene.remove(Plotter.lineMesh);		
 	}	
 }
 
@@ -243,7 +253,7 @@ Plotter.plotLine = function(numSteps, offset){
 	});
 	var numAngles = 16;
 	var angle;
-	var radius = 0.1;
+	var radius = Plotter.lineWidth/2;
 	// precalc angles
 	var angleStep = Math.PI*2/numAngles;
 	var cos = [];
@@ -284,7 +294,9 @@ Plotter.plotLine = function(numSteps, offset){
 	}
 	tubeGeometry.computeFaceNormals();
 	tubeMesh = new THREE.Mesh(tubeGeometry, tubeMaterial);
-	scene.add(tubeMesh);
+	if(Plotter.showLine){
+		scene.add(tubeMesh);
+	}
 	Plotter.lineMesh = tubeMesh;
 	// wireframe
 	var wireframeMaterial = new THREE.MeshBasicMaterial({color:0xFFFFFF, side:THREE.DoubleSide, wireframe:true});
