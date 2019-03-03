@@ -15,7 +15,7 @@
 
 
 #ui-1 .category {padding-bottom:2px;}
-#ui-1 .title {background:black;color:white;padding:5px;margin-bottom:2px;}
+#ui-1 .title {background:black;color:white;padding:5px;margin-bottom:2px;font-weight:bold;}
 #ui-1 .row {padding:2px 5px;box-sizing:border-box;font-size:0;}
 #ui-1 .row .label {width:76px;display:inline-block;color:black;font-size:12px;}
 #ui-1 .input-row-1 input {width:112px;}

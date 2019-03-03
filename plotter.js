@@ -62,46 +62,58 @@ Plotter.bounds = {
 };
 Plotter.quadSize = {x: 0.1, z: 0.1};
 Plotter.plot = function(expression){
-	Plotter.expression = expression;	
-	if(Plotter.areaMesh != null) scene.remove(Plotter.areaMesh); 
-	if(Plotter.lineMesh != null) scene.remove(Plotter.lineMesh);
-	Plotter.areaMesh = null;
-	Plotter.lineMesh = null;	
-	Plotter.areaResults = [];
-	Plotter.lineResults = [];
-	
-	// num steps
-	var numSteps = {};
-	numSteps.x = (Plotter.bounds.max_x-Plotter.bounds.min_x)/Plotter.quadSize.x+1;
-	numSteps.z = (Plotter.bounds.max_z-Plotter.bounds.min_z)/Plotter.quadSize.z+1;	
-	// offset
-	var offset = {};
-	offset.x = Plotter.bounds.min_x;
-	offset.z = Plotter.bounds.min_z;	
 	try {
-		Plotter.precalc(numSteps, offset);		
+		Plotter.expression = expression;	
+		if(Plotter.areaMesh != null) scene.remove(Plotter.areaMesh); 
+		if(Plotter.lineMesh != null) scene.remove(Plotter.lineMesh);
+		Plotter.areaMesh = null;
+		Plotter.lineMesh = null;	
+		Plotter.areaResults = [];
+		Plotter.lineResults = [];
+				
+		var contains_z = Plotter.expression.toLowerCase().indexOf("z") !== -1;
+				
+		// num steps
+		var numSteps = {};
+		numSteps.x = (Plotter.bounds.max_x-Plotter.bounds.min_x)/Plotter.quadSize.x+1;
+		numSteps.z = (Plotter.bounds.max_z-Plotter.bounds.min_z)/Plotter.quadSize.z+1;	
+		// offset
+		var offset = {};
+		offset.x = Plotter.bounds.min_x;
+		offset.z = Plotter.bounds.min_z;
+		Plotter.precalc(numSteps, offset, contains_z);	
+		if(contains_z) Plotter.plotArea(numSteps, offset);
+		Plotter.plotLine(numSteps, offset);
 	} catch(e){
 		return false;
 	}
-	Plotter.plotArea(numSteps, offset);
-	Plotter.plotLine(numSteps, offset);
 	return true;
 }
 
-Plotter.precalc = function(numSteps, offset){	
-	const expr = math.compile(Plotter.expression.replace(/z/g, "(x+z*i)"));
-	var x, z;
-	for(var ix = 0; ix < numSteps.x; ix++){
-		Plotter.areaResults[ix] = [];
-		for(var iz = 0; iz < numSteps.z; iz++){
-			x = ix * Plotter.quadSize.x + offset.x;
-			z = iz * Plotter.quadSize.z + offset.z;
-			Plotter.areaResults[ix][iz] = expr.eval({x:x, z:z});
+Plotter.precalc = function(numSteps, offset, complex){
+	if(complex){		
+		var ex = Plotter.expression.replace(/z/g, "(x+z*i)");
+		const expr = math.compile(ex);
+		var x, z;
+		for(var ix = 0; ix < numSteps.x; ix++){
+			Plotter.areaResults[ix] = [];
+			for(var iz = 0; iz < numSteps.z; iz++){
+				x = ix * Plotter.quadSize.x + offset.x;
+				z = iz * Plotter.quadSize.z + offset.z;
+				Plotter.areaResults[ix][iz] = expr.eval({x:x, z:z});
+			}
 		}
-	}
-	for(var ix = 0; ix < numSteps.x; ix++){
-		x = ix * Plotter.quadSize.x + offset.x;
-		Plotter.lineResults[ix] = expr.eval({x:x, z:0});
+		for(var ix = 0; ix < numSteps.x; ix++){
+			x = ix * Plotter.quadSize.x + offset.x;
+			Plotter.lineResults[ix] = expr.eval({x:x, z:0});
+		}
+	} else {		
+		const expr = math.compile(Plotter.expression);
+		var x;
+		for(var ix = 0; ix < numSteps.x; ix++){
+			x = ix * Plotter.quadSize.x + offset.x;
+			Plotter.lineResults[ix] = {re:expr.eval({x:x})};
+		}
 	}
 }
 
