@@ -42,7 +42,7 @@ function init(){
 	scene = new THREE.Scene();
 	
 	// renderer
-	renderer = new THREE.WebGLRenderer({canvas:Gfw.getCanvas("main").element});
+	renderer = new THREE.WebGLRenderer({canvas:Gfw.getCanvas("main").element,antialias:true});
 	renderer.setClearColor(new THREE.Color(0), 1);
 	
 	// camera
