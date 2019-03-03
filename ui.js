@@ -21,14 +21,22 @@ Ui.init = function(){
 	$(".line-wireframe").on("click", function(){
 		$(this).toggleClass("active");
 		Plotter.setShowLineWireframe($(this).hasClass("active"));
+		Ui.toCookie();
 	});
 	$(".area-wireframe").on("click", function(){
 		$(this).toggleClass("active");
 		Plotter.setShowAreaWireframe($(this).hasClass("active"));
+		Ui.toCookie();
 	});
 	$(".show-line").on("click", function(){
 		$(this).toggleClass("active");
 		Plotter.setShowLine($(this).hasClass("active"));
+		Ui.toCookie();
+	});
+	$(".show-area").on("click", function(){
+		$(this).toggleClass("active");
+		Plotter.setShowArea($(this).hasClass("active"));
+		Ui.toCookie();
 	});
 	$(".plot-real").on("click", function(){
 		$(".plot-real").addClass("active");
@@ -61,7 +69,7 @@ Ui.updateValues = function(){
 	$(".input.z-scale").val(Grid.scale.z);
 	$(".input.quad-size").val(Plotter.quadSize.x);
 	if(Plotter.showLineWireframe){
-		$(".line-wireframe").addClass("active");		
+		$(".line-wireframe").addClass("active");
 	} else {
 		$(".line-wireframe").removeClass("active");		
 	}
@@ -69,6 +77,16 @@ Ui.updateValues = function(){
 		$(".area-wireframe").addClass("active");		
 	} else {
 		$(".area-wireframe").removeClass("active");		
+	}
+	if(Plotter.showLine){
+		$(".show-line").addClass("active");
+	} else {
+		$(".show-line").removeClass("active");		
+	}
+	if(Plotter.showArea){
+		$(".show-area").addClass("active");		
+	} else {
+		$(".show-area").removeClass("active");		
 	}
 }
 
@@ -88,6 +106,7 @@ Ui.applyValues = function(){
 	Plotter.setShowLineWireframe($(".line-wireframe").hasClass("active"));
 	Plotter.setShowAreaWireframe($(".area-wireframe").hasClass("active"));
 	Plotter.setShowLine($(".show-line").hasClass("active"));
+	Plotter.setShowArea($(".show-area").hasClass("active"));
 	Plotter.setShowAreaWireframe($(".area-wireframe").hasClass("active"));
 	Ui.updateValues();
 	Ui.toCookie();
@@ -111,6 +130,7 @@ Ui.toggles = [
 	"line-wireframe",
 	"area-wireframe",
 	"show-line",
+	"show-area",
 ];
 Ui.fromCookie = function(){
 	$("#ui-1 input[type=text").each(function(){

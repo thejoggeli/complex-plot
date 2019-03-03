@@ -61,6 +61,8 @@ Plotter.areaWireframe = null;
 Plotter.lineWireframe = null;
 Plotter.showAreaWireframe = false;
 Plotter.showLineWireframe = false;
+Plotter.showLine = false;
+Plotter.showArea = false;
 Plotter.areaResults;
 Plotter.lineResults;
 Plotter.bounds = {
@@ -130,6 +132,15 @@ Plotter.setShowLine = function(v){
 		scene.add(Plotter.lineMesh);
 	} else if(!Plotter.showLine & Plotter.lineMesh != null){
 		scene.remove(Plotter.lineMesh);		
+	}	
+}
+Plotter.setShowArea = function(v){
+	if(v == Plotter.showArea) return;
+	Plotter.showArea = v;
+	if(Plotter.showArea & Plotter.areaMesh != null){
+		scene.add(Plotter.areaMesh);
+	} else if(!Plotter.showArea & Plotter.areaMesh != null){
+		scene.remove(Plotter.areaMesh);		
 	}	
 }
 Plotter.setMode = function(mode){
@@ -294,7 +305,9 @@ Plotter.plotArea = function(numSteps, offset){
 	bufferGeometry.normalizeNormals();
 	// plot mesh
 	plotMesh = new THREE.Mesh(bufferGeometry, material);	
-	scene.add(plotMesh);
+	if(Plotter.showArea){
+		scene.add(plotMesh);
+	}
 	Plotter.areaMesh = plotMesh;
 	// wireframe
 	var wireframeMaterial = new THREE.MeshBasicMaterial({color:0xFFFFFF, side:THREE.DoubleSide, wireframe:true});
