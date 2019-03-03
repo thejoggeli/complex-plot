@@ -32,10 +32,15 @@ function resize(){
 
 function init(){
 	// plot shader
-	THREE.ShaderLib.imaginaryPlot = {
+	THREE.ShaderLib.realPlot = {
 		uniforms: THREE.ShaderLib.lambert.uniforms,
-		vertexShader: CustomShaders.imaginaryPlot.vertexShader,
-		fragmentShader: CustomShaders.imaginaryPlot.fragmentShader,
+		vertexShader: CustomShaders.realPlot.vertexShader,
+		fragmentShader: CustomShaders.realPlot.fragmentShader,
+	}; 
+	THREE.ShaderLib.complexPlot = {
+		uniforms: THREE.ShaderLib.lambert.uniforms,
+		vertexShader: CustomShaders.complexPlot.vertexShader,
+		fragmentShader: CustomShaders.complexPlot.fragmentShader,
 	}; 
 	
 	// scene
@@ -61,7 +66,7 @@ function init(){
 	scene.add(directionalLight); 
 		
 	Grid.build();
-	Plotter.plot($(".expression-input").val());
+	Ui.beginPlot();
 	
 }
 

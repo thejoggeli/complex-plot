@@ -3,8 +3,9 @@
 	<title>Der komplexe Plot</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 	<script src="jquery-3.2.1.min.js"></script>
-	<script src="gl-matrix/dist/gl-matrix.js"></script>
+	<script src="jquery.cookie.js"></script>
 	<script src="math.js"></script>
+	<script src="storage.js"></script>
 	<script src="shaders.js"></script>
 	<script src="game.js"></script>
 	<script src="three.js"></script>
@@ -26,31 +27,10 @@
 	<div id="ui-1">
 		<div class="maximize">+</div>
 		<div class="category">
-			<div class="title">Boundaries<div class="minimize">-</div></div>
-			<div class="row input-row-2">
-				<div class="label">Real</div>
-				<input class="input-1 min-x" type="text" value="-25.0">
-				<input class="input-2 max-x" type="text" value="25.0">
-			</div>
-			<div class="row input-row-2">
-				<div class="label">Imaginary</div>
-				<input class="input-1 min-z" type="text" value="-1.0">
-				<input class="input-2 max-z" type="text" value="0.0">
-			</div>		
-		</div>
-		<div class="category">
-			<div class="title">Grid scale (x,y,z)</div>
-			<div class="row input-row-3">
-				<input type="text" class="input-1 x-scale" value="1.0" >
-				<input type="text" class="input-2 y-scale" value="1.0">
-				<input type="text" class="input-3 z-scale" value="1.0">
-			</div>
-		</div>
-		<div class="category">
-			<div class="title">Plot Settings</div>
+			<div class="title">Display</div>
 			<div class="row input-row-1">
 				<div class="label">Quad size</div>
-				<input type="text" value="0.1" class="quad-size">		
+				<input type="text" value="0.1" class="quad-size" name="quad-size">		
 			</div>
 			<div class="row input-row-2">
 				<div class="label">Wireframe</div>
@@ -63,13 +43,55 @@
 			</div>
 			<div class="row input-row-1">
 				<div class="label">Line Width</div>
-				<input class="input-1 line-width" type="text" value="0.125">
+				<input class="input-1 line-width" type="text" value="0.125" name="line-width">
 			</div>	
 		</div>
 		<div class="category">
-			<div class="title">f(x,z) or f(c)</div>	
+			<div class="title">Grid scale (x,y,z)</div>
+			<div class="row input-row-3">
+				<input type="text" class="input-1 x-scale" value="1.0" name="x-scale">
+				<input type="text" class="input-2 y-scale" value="1.0" name="y-scale">
+				<input type="text" class="input-3 z-scale" value="1.0" name="z-scale">
+			</div>
+		</div>
+		<div class="category">
+			<div class="title">Boundaries<div class="minimize">-</div></div>
+			<div class="row input-row-2">
+				<div class="label">X-Axis</div>
+				<input class="input-1 min-x" type="text" value="-25.0" name="min-x">
+				<input class="input-2 max-x" type="text" value="25.0" name="max-x">
+			</div>
+			<div class="row input-row-2">
+				<div class="label">Z-Axis</div>
+				<input class="input-1 min-z" type="text" value="-1.0" name="min-z">
+				<input class="input-2 max-z" type="text" value="0.0" name="max-z">
+			</div>
+		</div>
+		<div class="category">
+			<div class="title">Plot Type<div class="minimize">-</div></div>
+			<div class="row input-row-2-nolabel">
+				<button class="input-1 plot-real toggle-button">Real</button>
+				<button class="active input-2 plot-complex toggle-button">Complex</button>
+			</div>		
+		</div>
+		<div class="category">
+			<div class="title real">f(x,z)</div>
+			<div class="description real">
+				<div><strong>In</strong>  &nbsp;x&nbsp;&nbsp;&nbsp;&nbsp; = x axis </div>
+				<div><strong>In</strong>  &nbsp;z&nbsp;&nbsp;&nbsp;&nbsp; = z axis</div>
+				<div><strong>Out</strong> y&nbsp;&nbsp;&nbsp;&nbsp; = value</div>
+				<div><strong>Out</strong> color = height</div>
+			</div>
+			<div class="title complex">f(x,z) or f(c)</div>
+			<div class="description complex">
+				<div><strong>In</strong>  &nbsp;x&nbsp;&nbsp;&nbsp;&nbsp; = real axis </div>
+				<div><strong>In</strong>  &nbsp;z&nbsp;&nbsp;&nbsp;&nbsp; = imaginary axis</div>
+				<div><strong>In</strong>  &nbsp;c&nbsp;&nbsp;&nbsp;&nbsp; = (x+z)</div>
+				<div><strong>Out</strong> y&nbsp;&nbsp;&nbsp;&nbsp; = real part</div>
+				<div><strong>Out</strong> color = imaginary part</div>
+			</div>
 			<div class="row expression-row">
-				<input type="text" value="sin(c-pi)*sin(c*0.25)+0.5" class="expression-input">	
+				<input type="text" value="sin(c-pi)*sin(c*0.25)" class="expression-input" name="expression-input">	
 			</div>
 		</div>		
 		<div class="category">

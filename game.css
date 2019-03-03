@@ -22,6 +22,8 @@
 #ui-1 .input-row-1 input {width:114px;}
 #ui-1 .input-row-2 button,
 #ui-1 .input-row-2 input {width:55px;text-align:center;}
+#ui-1 .input-row-2-nolabel button {width:93px;}
+#ui-1 .input-row-2-nolabel .input-1 {margin-right:4px;}
 #ui-1 .input-row-2 .input-1 {margin-right:4px;}
 #ui-1 .input-row-3 input {width:60px;margin-right:5px;text-align:center;}
 #ui-1 .input-row-3 .input-3 {margin-right:0;}
@@ -44,4 +46,8 @@
 }
 #ui-1 .maximize {
 	position:fixed;height:25px;border-radius:0 0 0 4px;color:black;background:#ffa;
+}
+
+#ui-1 .description {
+	padding:5px;padding-top:2px;color:black;padding-bottom:5px;
 }

@@ -8,7 +8,6 @@ Ui.init = function(){
 			Ui.beginPlot();
 		}
 	});
-	Ui.applyValues();
 	$("#ui-1 .minimize").on("click", function(){
 		$("#ui-1 .maximize").show();
 		$("#ui-1 .minimize").hide();
@@ -31,9 +30,51 @@ Ui.init = function(){
 		$(this).toggleClass("active");
 		Plotter.setShowLine($(this).hasClass("active"));
 	});
+	$(".plot-real").on("click", function(){
+		$(".plot-real").addClass("active");
+		$(".plot-complex").removeClass("active");
+		$(".real").show();
+		$(".complex").hide();
+	});
+	$(".plot-complex").on("click", function(){
+		$(".plot-complex").addClass("active");
+		$(".plot-real").removeClass("active");
+		$(".real").hide();
+		$(".complex").show();
+	});
+	Ui.fromCookie();
+}
+
+Ui.updateValues = function(){
+	if(Plotter.mode == "real"){
+		$(".plot-real").trigger("click");		
+	} else {
+		$(".plot-complex").trigger("click");				
+	}
+	$(".line-width").val(Plotter.lineWidth);
+	$(".line-min-x").val(Plotter.bounds.min_x);
+	$(".line-max-x").val(Plotter.bounds.max_x);
+	$(".line-min-z").val(Plotter.bounds.min_z);
+	$(".line-max-z").val(Plotter.bounds.max_z);
+	$(".input.x-scale").val(Grid.scale.x);
+	$(".input.y-scale").val(Grid.scale.y);
+	$(".input.z-scale").val(Grid.scale.z);
+	$(".input.quad-size").val(Plotter.quadSize.x);
+	if(Plotter.showLineWireframe){
+		$(".line-wireframe").addClass("active");		
+	} else {
+		$(".line-wireframe").removeClass("active");		
+	}
+	if(Plotter.showAreaWireframe){
+		$(".area-wireframe").addClass("active");		
+	} else {
+		$(".area-wireframe").removeClass("active");		
+	}
 }
 
 Ui.applyValues = function(){
+	var mode = $(".plot-real").hasClass("active") ? "real" : "complex";
+	Plotter.setMode(mode);	
 	Plotter.lineWidth = parseFloat($(".line-width").val());
 	Plotter.bounds.min_x = parseFloat($("input.min-x").val());
 	Plotter.bounds.max_x = parseFloat($("input.max-x").val());
@@ -48,14 +89,70 @@ Ui.applyValues = function(){
 	Plotter.setShowAreaWireframe($(".area-wireframe").hasClass("active"));
 	Plotter.setShowLine($(".show-line").hasClass("active"));
 	Plotter.setShowAreaWireframe($(".area-wireframe").hasClass("active"));
+	Ui.updateValues();
+	Ui.toCookie();
 }
-
 
 Ui.beginPlot = function(){	
 	Ui.applyValues();
-	var expression = $(".expression-input").val();
+	var expression = $(".expression-input").val()
+	console.log("expression: " + expression);
 	Grid.build();
 	if(!Plotter.plot(expression)){
-		alert("invalid expression: " + expression);
-	}	
+		if(Plotter.mode == "real" && Plotter.resultIsComplex){
+			alert("Invalid expression:\n\"" + expression + "\"\n" + "Result is complex");			
+		} else {
+			alert("Invalid expression:\n\"" + expression + "\"");			
+		}
+	}
 }
+
+
+Ui.toggles = [
+	"line-wireframe",
+	"area-wireframe",
+	"show-line",
+];
+Ui.fromCookie = function(){
+	$("#ui-1 input[type=text").each(function(){
+		var name = "ui-" + $(this).attr("name");
+		var val = Storage.window.get(name, null);
+		if(val !== null){
+			$(this).val(val);
+		}
+	});
+	var mode = Storage.window.get("ui-plot-mode", null);
+	if(mode !== null){
+		if(mode == "real"){
+			$(".plot-real").trigger("click");		
+		} else {
+			$(".plot-complex").trigger("click");				
+		}		
+	}
+	for(var t in Ui.toggles){
+		var name = "ui-" + Ui.toggles[t];
+		var val = Storage.window.get(name, null);
+		if(val !== null){
+			console.log(name, val);
+			if(val){
+				$("."+Ui.toggles[t]).addClass("active");
+			} else {
+				$("."+Ui.toggles[t]).removeClass("active");
+			}
+		}
+	}
+}
+Ui.toCookie = function(){	
+	$("#ui-1 input[type=text").each(function(){
+		var name = "ui-" + $(this).attr("name");
+		var val = $(this).val();
+		Storage.window.set(name, $(this).val());
+	});
+	Storage.window.set("ui-plot-mode", $(".plot-real").hasClass("active") ? "real" : "complex");
+	for(var t in Ui.toggles){
+		var name = "ui-" + Ui.toggles[t];
+		var val = $("."+Ui.toggles[t]).hasClass("active");
+		Storage.window.set(name, val);
+	}
+}
+

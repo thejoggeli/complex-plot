@@ -1,6 +1,6 @@
 function CustomShaders(){};
-CustomShaders.customPlot = {};
-CustomShaders.customPlot.vertexShader = `
+CustomShaders.realPlot = {};
+CustomShaders.realPlot.vertexShader = `
 #define LAMBERT
 
 varying vec3 vLightFront;
@@ -55,7 +55,7 @@ void main() {
 	
 }
 `;
-CustomShaders.customPlot.fragmentShader = `
+CustomShaders.realPlot.fragmentShader = `
 uniform vec3 diffuse;
 uniform vec3 emissive;
 uniform float opacity;
@@ -63,6 +63,10 @@ uniform float opacity;
 varying vec3 vCustomWorldPosition;
 varying vec3 vLightFront;
 varying vec3 vIndirectFront;
+
+uniform float min_plot_y;
+uniform float max_plot_y;
+uniform float plot_y_range;
 
 #ifdef DOUBLE_SIDED
 	varying vec3 vLightBack;
@@ -97,8 +101,22 @@ void main() {
 
 	#include <clipping_planes_fragment>
 	
-	float hue = mod(vCustomWorldPosition.y * 0.01, 1.0);
-	vec4 diffuseColor = vec4(hsl2rgb(vec3(hue, 1.0, 0.5)), opacity);
+	float hue, sat, lig;
+	if(max_plot_y == 0.0 && min_plot_y == 0.0){
+		hue = 0.333/2.0;
+		sat = 1.0;
+		lig = 0.35;
+	} else {	
+		hue = 0.333/2.0;
+		sat = 1.0;
+		if(vCustomWorldPosition.y > 0.0){
+			hue += vCustomWorldPosition.y/max_plot_y*(0.333/2.0);
+		} else {
+			hue -= vCustomWorldPosition.y/min_plot_y*(0.333/2.0);
+		}
+		lig = 0.35; // sat*0.5;
+	}
+	vec4 diffuseColor = vec4(hsl2rgb(vec3(hue, sat, lig)), opacity);
 	
 	ReflectedLight reflectedLight = ReflectedLight( vec3( 0.0 ), vec3( 0.0 ), vec3( 0.0 ), vec3( 0.0 ) );
 	vec3 totalEmissiveRadiance = emissive;
@@ -192,8 +210,8 @@ vec3 hsl2rgb(vec3 hsl) {
 }
 `;
 
-CustomShaders.imaginaryPlot = {};
-CustomShaders.imaginaryPlot.vertexShader = `
+CustomShaders.complexPlot = {};
+CustomShaders.complexPlot.vertexShader = `
 #define LAMBERT
 
 varying vec3 vLightFront;
@@ -250,7 +268,7 @@ void main() {
 	
 }
 `;
-CustomShaders.imaginaryPlot.fragmentShader = `
+CustomShaders.complexPlot.fragmentShader = `
 uniform vec3 diffuse;
 uniform vec3 emissive;
 uniform float opacity;

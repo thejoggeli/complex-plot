@@ -51,6 +51,8 @@ Grid.build = function(){
 }
 
 function Plotter(){}
+Plotter.mode = "complex";
+Plotter.resultIsComplex = false;
 Plotter.lineWidth;
 Plotter.expression = "sin(z)";
 Plotter.areaMesh = null;
@@ -88,12 +90,16 @@ Plotter.plot = function(expression){
 		var offset = {};
 		offset.x = Plotter.bounds.min_x;
 		offset.z = Plotter.bounds.min_z;
-		var isComplex = Plotter.precalc(numSteps, offset);
-		console.log("isComplex: " + isComplex);
-		if(isComplex) Plotter.plotArea(numSteps, offset);
-		Plotter.plotLine(numSteps, offset);
+		Plotter.precalc(numSteps, offset);
+		if(Plotter.mode == "real" && Plotter.resultIsComplex){
+			return false;
+		} 
+		if(Plotter.mode == "real" || Plotter.mode == "complex" && Plotter.resultIsComplex){
+			Plotter.plotArea(numSteps, offset);
+		}
+		Plotter.plotLine(numSteps, offset);	
 	} catch(e){
-		console.log(e);
+		console.error(e);
 		return false;
 	}
 	return true;
@@ -126,13 +132,20 @@ Plotter.setShowLine = function(v){
 		scene.remove(Plotter.lineMesh);		
 	}	
 }
+Plotter.setMode = function(mode){
+	Plotter.mode = mode;	
+}
 
 Plotter.precalc = function(numSteps, offset){
-	var isComplex = false;
+	Plotter.resultIsComplex = false;
 	var ex = Plotter.expression;
-	ex = ex.replace(/cos/g, "COS");
-	ex = ex.replace(/c/g, "(x+z)");
-	ex = ex.replace(/z/g, "z*i");
+	if(Plotter.mode == "real"){
+		// nothing to do		
+	} else {
+		ex = ex.replace(/cos/g, "COS");
+		ex = ex.replace(/c/g, "(x+z)");
+		ex = ex.replace(/z/g, "z*i");
+	}
 	ex = ex.toLowerCase();
 	const expr = math.compile(ex);
 	var x, z, res;
@@ -143,7 +156,7 @@ Plotter.precalc = function(numSteps, offset){
 			z = iz * Plotter.quadSize.z + offset.z;
 			Plotter.areaResults[ix][iz] = expr.eval({x:x, z:z});
 			if(Plotter.areaResults[ix][iz].re !== undefined){
-				isComplex = true;
+				Plotter.resultIsComplex = true;
 			} else {
 				Plotter.areaResults[ix][iz] = {re: Plotter.areaResults[ix][iz], im: 0};
 			}
@@ -153,12 +166,11 @@ Plotter.precalc = function(numSteps, offset){
 		x = ix * Plotter.quadSize.x + offset.x;
 		Plotter.lineResults[ix] = expr.eval({x:x, z:0});
 		if(Plotter.lineResults[ix].re !== undefined){
-			isComplex = true;
+			Plotter.resultIsComplex = true;
 		} else {
 			Plotter.lineResults[ix] = {re: Plotter.lineResults[ix], im: 0};
 		} 
 	}
-	return isComplex;
 }
 
 Plotter.plotArea = function(numSteps, offset){
@@ -172,60 +184,110 @@ Plotter.plotArea = function(numSteps, offset){
 	var colors = [];
 	var normals = [];
 	var indices = [];
-	var max_i = -Infinity;
-	var min_i = Infinity;
-	var im;
-	for(var ix = 0; ix < numSteps.x; ix++){
-		for(var iz = 0; iz < numSteps.z; iz++){
-			// xz
-			x = ix * Plotter.quadSize.x + offset.x;
-			z = iz * Plotter.quadSize.z + offset.z;			
-			// real
-			y = Plotter.areaResults[ix][iz].re;			
-			// imaginary 
-			im = Plotter.areaResults[ix][iz].im;
-			imaginaries.push(im);
-			if(im < min_i) min_i = im;
-			if(im > max_i) max_i = im;			
-			// vertices, colors, normals
-			vertices.push(x*scale.x, y*scale.y, z*scale.z);
-			colors.push(1.0, 0.0, 0.0);
-			normals.push(0,0,0);			
-			// faces
-			if(ix > 0 && iz > 0){
-				indices.push(vector_index, vector_index-numSteps.z, vector_index-numSteps.z-1);
-				indices.push(vector_index, vector_index-numSteps.z-1, vector_index-1);
+	var max_y, min_y, max_i, min_i;
+	if(Plotter.mode == "real"){
+		max_y = -Infinity;
+		min_y = Infinity;
+		for(var ix = 0; ix < numSteps.x; ix++){
+			for(var iz = 0; iz < numSteps.z; iz++){
+				// xz
+				x = ix * Plotter.quadSize.x + offset.x;
+				z = iz * Plotter.quadSize.z + offset.z;			
+				// real
+				y = Plotter.areaResults[ix][iz].re;
+				if(y > max_y) max_y = y;
+				if(y < min_y) min_y = y;
+				// vertices, colors, normals
+				vertices.push(x*scale.x, y*scale.y, z*scale.z);
+				colors.push(1.0, 0.0, 0.0);
+				normals.push(0,0,0);	
+				// faces
+				if(ix > 0 && iz > 0){
+					indices.push(vector_index, vector_index-numSteps.z, vector_index-numSteps.z-1);
+					indices.push(vector_index, vector_index-numSteps.z-1, vector_index-1);
+				}
+				vector_index++;
 			}
-			vector_index++;
 		}
+	} else {
+		max_i = -Infinity;
+		min_i = Infinity;
+		var im;
+		for(var ix = 0; ix < numSteps.x; ix++){
+			for(var iz = 0; iz < numSteps.z; iz++){
+				// xz
+				x = ix * Plotter.quadSize.x + offset.x;
+				z = iz * Plotter.quadSize.z + offset.z;			
+				// real
+				y = Plotter.areaResults[ix][iz].re;			
+				// imaginary 
+				im = Plotter.areaResults[ix][iz].im;
+				imaginaries.push(im);
+				if(im < min_i) min_i = im;
+				if(im > max_i) max_i = im;			
+				// vertices, colors, normals
+				vertices.push(x*scale.x, y*scale.y, z*scale.z);
+				colors.push(1.0, 0.0, 0.0);
+				normals.push(0,0,0);			
+				// faces
+				if(ix > 0 && iz > 0){
+					indices.push(vector_index, vector_index-numSteps.z, vector_index-numSteps.z-1);
+					indices.push(vector_index, vector_index-numSteps.z-1, vector_index-1);
+				}
+				vector_index++;
+			}
+		}		
+		console.log("i min,max = " + min_i + "," + max_i); 
 	}
 	// plot geometry
-	var bufferGeometry = new THREE.BufferGeometry();
+	var bufferGeometry, material;
+	if(Plotter.mode == "real"){
+		bufferGeometry = new THREE.BufferGeometry();
+		// plot material
+		var uniforms = THREE.UniformsUtils.clone(THREE.ShaderLib.realPlot.uniforms);
+		uniforms["diffuse"].value.set(0xFF0000);
+		uniforms["min_plot_y"] = {value:min_y};
+		uniforms["max_plot_y"] = {value:max_y};
+		uniforms["plot_y_range"] = {value:max_y-min_y};
+		material = new THREE.ShaderMaterial({
+			defines: {},
+			uniforms: uniforms,
+			vertexShader: THREE.ShaderLib.realPlot.vertexShader,
+			fragmentShader: THREE.ShaderLib.realPlot.fragmentShader,
+			name: 'custom-plot',		
+			side:THREE.DoubleSide,
+			polygonOffset: true,
+			polygonOffsetFactor: 1,
+			polygonOffsetUnits: 1,
+			lights: true,
+		});
+	} else {
+		bufferGeometry = new THREE.BufferGeometry();
+		bufferGeometry.addAttribute('imaginary', new THREE.Float32BufferAttribute(imaginaries, 1));
+		// plot material
+		var uniforms = THREE.UniformsUtils.clone(THREE.ShaderLib.complexPlot.uniforms);
+		uniforms["diffuse"].value.set(0xFF0000);
+		uniforms["min_plot_i"] = {value:min_i};
+		uniforms["max_plot_i"] = {value:max_i};
+		uniforms["plot_i_range"] = {value:max_i-min_i};
+		material = new THREE.ShaderMaterial({
+			defines: {},
+			uniforms: uniforms,
+			vertexShader: THREE.ShaderLib.complexPlot.vertexShader,
+			fragmentShader: THREE.ShaderLib.complexPlot.fragmentShader,
+			name: 'custom-plot',		
+			side:THREE.DoubleSide,
+			polygonOffset: true,
+			polygonOffsetFactor: 1,
+			polygonOffsetUnits: 1,
+			lights: true,
+		});		
+	}
 	bufferGeometry.setIndex(indices);
 	bufferGeometry.addAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
 	bufferGeometry.addAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-	bufferGeometry.addAttribute('imaginary', new THREE.Float32BufferAttribute(imaginaries, 1));
-	console.log("i min,max = " + min_i + "," + max_i); 
 	bufferGeometry.computeVertexNormals();
 	bufferGeometry.normalizeNormals();
-	// plot material
-	var uniforms = THREE.UniformsUtils.clone(THREE.ShaderLib.imaginaryPlot.uniforms);
-	uniforms["diffuse"].value.set(0xFF0000);
-	uniforms["min_plot_i"] = {value:min_i};
-	uniforms["max_plot_i"] = {value:max_i};
-	uniforms["plot_i_range"] = {value:max_i-min_i};
-	var material = new THREE.ShaderMaterial({
-		defines: {},
-		uniforms: uniforms,
-		vertexShader: THREE.ShaderLib.imaginaryPlot.vertexShader,
-		fragmentShader: THREE.ShaderLib.imaginaryPlot.fragmentShader,
-		name: 'custom-plot',		
-		side:THREE.DoubleSide,
-		polygonOffset: true,
-		polygonOffsetFactor: 1,
-		polygonOffsetUnits: 1,
-		lights: true,
-	});
 	// plot mesh
 	plotMesh = new THREE.Mesh(bufferGeometry, material);	
 	scene.add(plotMesh);
