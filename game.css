@@ -1,1 +1,41 @@
+#ui-1 {
+	font-size:12px;font-family:"VeraMono";color:white;
+	background:#fffa;border-radius:0 0 0 4px;
+	position:fixed;top:0;right:0;z-index:50000;
+	user-select:none;
+}
+#ui-1 button {border:1px solid black;background:white;min-width:32px;height:22px;pointer-events:auto;outline:none;border-radius:4px;}
+#ui-1 button:hover {cursor:pointer;}
+#ui-1 button:active {background:black !important; color:white;}
+#ui-1 input[type="text"]{
+	border:1px solid black;background:white;height:22px;box-sizing:border-box;font-size:12px;color:black;outline:none;
+	font-family:"VeraMono";padding:0 2px;border-radius:4px;
+}
+#ui-1 input[type="text"].expression-input {text-align:left;}
 
+
+#ui-1 .category {padding-bottom:2px;}
+#ui-1 .title {background:black;color:white;padding:5px;margin-bottom:2px;}
+#ui-1 .row {padding:2px 5px;box-sizing:border-box;font-size:0;}
+#ui-1 .row .label {width:76px;display:inline-block;color:black;font-size:12px;}
+#ui-1 .input-row-1 input {width:112px;}
+#ui-1 .input-row-2 input {width:55px;text-align:center;}
+#ui-1 .input-row-2 .input-1 {margin-right:4px;}
+#ui-1 .input-row-3 input {width:60px;margin-right:4px;text-align:center;}
+#ui-1 .input-row-3 .input-3 {margin-right:0;}
+#ui-1 .expression-row input {width:100%;}
+#ui-1 .plotit-row button {width:100%;}
+
+#ui-1 .maximize {display:none}
+#ui-1 .minimize, 
+#ui-1 .maximize {
+	position:absolute;right:0;top:0;z-index:50005;color:white;font-family:"VeraMono";font-size:16px;
+	height:25px;width:25px;text-align:center;font-weight:bold;line-height:23px;
+}
+#ui-1 .minimize:hover, 
+#ui-1 .maximize:hover {
+	cursor:pointer;
+}
+#ui-1 .maximize {
+	position:fixed;height:25px;border-radius:0 0 0 4px;color:black;background:#ffa;
+}

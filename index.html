@@ -4,11 +4,13 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 	<script src="jquery-3.2.1.min.js"></script>
 	<script src="gl-matrix/dist/gl-matrix.js"></script>
-	<script src="complex.js"></script>
+	<script src="math.js"></script>
 	<script src="shaders.js"></script>
 	<script src="game.js"></script>
 	<script src="three.js"></script>
+	<script src="ui.js"></script>
 	<script src="OrbitControls.js"></script>
+	<script src="plotter.js"></script>
 	<script src="gfw.js"></script>
 	<link rel="stylesheet" type="text/css" href="gfw.css">
 	<link rel="stylesheet" type="text/css" href="game.css">
@@ -20,5 +22,45 @@
 		<div id="controls-box">
 			<div class="controls-header">Controls</div>
 		</div>
+	</div>
+	<div id="ui-1">
+		<div class="maximize">+</div>
+		<div class="category">
+			<div class="title">Boundaries<div class="minimize">-</div></div>
+			<div class="row input-row-2">
+				<div class="label">Real</div>
+				<input class="input-1 min-x" type="text" value="-25">
+				<input class="input-2 max-x" type="text" value="25">
+			</div>
+			<div class="row input-row-2">
+				<div class="label">Imaginary</div>
+				<input class="input-1 min-z" type="text" value="-1.5">
+				<input class="input-2 max-z" type="text" value="0">
+			</div>		
+		</div>
+		<div class="category">
+			<div class="title">Grid scale (x,y,z)</div>
+			<div class="row input-row-3">
+				<input type="text" class="input-1 x-scale" value="1.0" >
+				<input type="text" class="input-2 y-scale" value="1.0">
+				<input type="text" class="input-3 z-scale" value="1.0">
+			</div>
+		</div>
+		<div class="category">
+			<div class="title">Plot Settings</div>
+			<div class="row input-row-1">
+				<div class="label">Quad size</div>
+				<input type="text" value="0.1" class="quad-size">		
+			</div>
+		</div>
+		<div class="category">
+			<div class="title">f(z)</div>	
+			<div class="row expression-row">
+				<input type="text" value="sin(z-pi)*sin(x*0.25)+0.5" class="expression-input">	
+			</div>
+		</div>		
+		<div class="category">
+			<div class="row plotit-row"><button class="plot-it">Plot it!</button></div>			
+		</div>		
 	</div>
 </body></html>

@@ -32,12 +32,12 @@ canvas:focus {outline:0;}
 #monitor-box .monitor-name,
 #controls-box .controls-name, 
 #monitor-box .monitor-label,
-#controls-box .controls-label {color:black;}
+#controls-box .controls-label {color:white;}
 
 #monitor-box .monitor-value,
 #controls-box .controls-value,
 #monitor-box .monitor-header,
-#controls-box .controls-header {color:black;}
+#controls-box .controls-header {color:white;}
 
 .noselect {
   -webkit-touch-callout: none; /* iOS Safari */
