@@ -50,6 +50,87 @@ Grid.build = function(){
 	}	
 }
 
+function MiniGrid(){}
+MiniGrid.mesh;
+MiniGrid.scene;
+MiniGrid.camera;
+MiniGrid.init = function(){	
+	// scene
+	MiniGrid.scene = new THREE.Scene();
+	
+	// camera
+	MiniGrid.camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 1, 1000);
+	MiniGrid.camera.position.set(0,0,50);
+	MiniGrid.camera.lookAt(new THREE.Vector3(0,0,0));
+	
+	// light
+    var ambientLight = new THREE.AmbientLight(0xFFFFFF);
+    ambientLight.intensity = 0.35;
+    MiniGrid.scene.add(ambientLight);
+    
+	var directionalLight = new THREE.DirectionalLight(0xFFFFFF);
+	directionalLight.position.set(0, 20, 20);
+	directionalLight.intensity = 1;
+	MiniGrid.scene.add(directionalLight); 
+	
+	// grid
+	var group = new THREE.Group();
+	group.add(MiniGrid.buildArrow(new THREE.Vector3(1,0,0), new THREE.Vector3(0,0,1), 0xFF0000));
+	group.add(MiniGrid.buildArrow(new THREE.Vector3(0,1,0), new THREE.Vector3(0,0,2), 0x00FF00));
+	group.add(MiniGrid.buildArrow(new THREE.Vector3(0,0,1), new THREE.Vector3(-1,0,0), 0x0000FF));
+	var scale = 0.4;
+	group.scale.set(scale, scale, scale);
+	MiniGrid.mesh = group;
+	MiniGrid.scene.add(MiniGrid.mesh);
+}
+MiniGrid.buildArrow = function(position, rotation, color){	
+	var length = 2;
+	var geometry = new THREE.CylinderGeometry(0.1, 0.1, length, 8, 1);
+	var material = new THREE.MeshLambertMaterial({color:color});
+	var group = new THREE.Group();
+	var axis;
+	// cone
+	axis = new THREE.Mesh(geometry, material);
+	axis.position.x = position.x*length/2;
+	axis.position.y = position.y*length/2;
+	axis.position.z = position.z*length/2;
+	axis.rotation.x = rotation.x * Math.PI/2;
+	axis.rotation.y = rotation.y * Math.PI/2;
+	axis.rotation.z = rotation.z * Math.PI/2;
+	group.add(axis);
+	// cone
+	var length2 = 0.5;
+	geometry = new THREE.CylinderGeometry(0.2, 0, length2, 8, 1);
+	axis = new THREE.Mesh(geometry, material);
+	axis.position.x = position.x*length2/2 + position.x*length;
+	axis.position.y = position.y*length2/2 + position.y*length;
+	axis.position.z = position.z*length2/2 + position.z*length;
+	axis.rotation.x = rotation.x * Math.PI/2;
+	axis.rotation.y = rotation.y * Math.PI/2;
+	axis.rotation.z = rotation.z * Math.PI/2;
+	group.add(axis);
+	return group;
+}
+MiniGrid.update = function(){
+/*	MiniGrid.mesh.rotation.x = camera.rotation.x;
+	MiniGrid.mesh.rotation.y = camera.rotation.y;
+	MiniGrid.mesh.rotation.z = camera.rotation.z; */
+	MiniGrid.mesh.quaternion.copy(camera.quaternion);
+	MiniGrid.mesh.quaternion.inverse();
+}
+MiniGrid.render = function(){
+	var size = window.innerHeight/3;
+	renderer.setViewport(0, 0, size, size);
+	renderer.render(MiniGrid.scene, MiniGrid.camera);
+}
+MiniGrid.resize = function(){
+/*	MiniGrid.camera.aspect = 1;
+	MiniGrid.camera.far = 5000;
+	MiniGrid.camera.near = 0.1;
+	MiniGrid.camera.fov = 90;
+	MiniGrid.camera.updateProjectionMatrix(); */
+}
+
 function Cursor(){}
 Cursor.raycaster = new THREE.Raycaster();
 Cursor.mouse = new THREE.Vector2();

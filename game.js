@@ -28,6 +28,7 @@ function resize(){
 	camera.near = 0.1;
 	camera.fov = 90/(window.innerWidth/window.innerHeight)*(16.0/9.0); // left-right fov at 16:9 = 90°
 	camera.updateProjectionMatrix();
+	MiniGrid.resize();	
 }
 
 function init(){
@@ -67,6 +68,7 @@ function init(){
 		
 	Cursor.init();
 	Grid.build();
+	MiniGrid.init();
 	Ui.beginPlot();
 	
 }
@@ -74,12 +76,21 @@ function init(){
 function update(){
 	Cursor.update();
 	directionalLight.position.set(camera.position.x, camera.position.y, camera.position.z);
+	MiniGrid.update();
 	// monitor stuffs
 	Monitor.set("FPS", Time.fps);
 }
 
 function render(){
+	renderer.autoClear = false;
+	renderer.clear();
+	
+	renderer.setViewport(0, 0, window.innerWidth, window.innerHeight);
 	renderer.render(scene, camera);
+		
+	renderer.clearDepth(); // important! clear the depth buffer
+	MiniGrid.render();
+		
 }
 
 
