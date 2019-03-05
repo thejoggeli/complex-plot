@@ -65,12 +65,14 @@ function init(){
 	directionalLight.intensity = 1;
 	scene.add(directionalLight); 
 		
+	Cursor.init();
 	Grid.build();
 	Ui.beginPlot();
 	
 }
 
 function update(){
+	Cursor.update();
 	directionalLight.position.set(camera.position.x, camera.position.y, camera.position.z);
 	// monitor stuffs
 	Monitor.set("FPS", Time.fps);

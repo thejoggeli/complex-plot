@@ -50,6 +50,77 @@ Grid.build = function(){
 	}	
 }
 
+function Cursor(){}
+Cursor.raycaster = new THREE.Raycaster();
+Cursor.mouse = new THREE.Vector2();
+Cursor.mesh = null;
+Cursor.lookAtPosition = new THREE.Vector3();
+Cursor.init = function(){	
+	var group = new THREE.Group();
+	var length = 1;
+	var geometry = new THREE.CylinderGeometry(0.25, 0.025, length, 8, 1);
+	var material = new THREE.MeshLambertMaterial({color:0xFF00FF});
+	var axis;
+	// cone
+	// z-axis
+	axis = new THREE.Mesh(geometry, material);
+	axis.position.z = -length/2;
+	axis.rotation.x = -Math.PI/2;
+	group.add(axis);
+/*	axis = new THREE.Mesh(geometry, material);
+	axis.position.z = length/2;
+	axis.rotation.x = Math.PI/2;
+	group.add(axis); */
+	// x-axis
+/*	axis = new THREE.Mesh(geometry, material);
+	axis.position.x = length/2;
+	axis.rotation.z = -Math.PI/2;
+	group.add(axis);
+	axis = new THREE.Mesh(geometry, material);
+	axis.position.x = -length/2;
+	axis.rotation.z = Math.PI/2;
+	group.add(axis);
+	// y-axis
+	axis = new THREE.Mesh(geometry, material);
+	axis.position.y = length/2;
+	group.add(axis);
+	axis = new THREE.Mesh(geometry, material);
+	axis.position.y = -length/2;
+	axis.rotation.x = -Math.PI;
+	group.add(axis); */
+	Cursor.mesh = group;
+}
+Cursor.update = function(){
+	Cursor.mouse.x = Input.mouse.screenPosition.x / window.innerWidth*2 - 1;
+	Cursor.mouse.y = -Input.mouse.screenPosition.y / window.innerHeight*2 + 1;
+	Cursor.raycaster.setFromCamera(Cursor.mouse, camera);
+	var intersects = Cursor.raycaster.intersectObjects(Plotter.raycastTargets);
+	if(intersects.length > 0){
+		var point = intersects[0].point;
+		if(Cursor.mesh.parent !== scene){
+			scene.add(Cursor.mesh);
+		}
+		console.log(intersects[0]);
+		Cursor.mesh.position.x = point.x;
+		Cursor.mesh.position.y = point.y;
+		Cursor.mesh.position.z = point.z;
+		var distance = intersects[0].distance;
+		var scale = distance*0.05;
+		var normal = intersects[0].face.normal;
+		Cursor.lookAtPosition.x = point.x + normal.x;
+		Cursor.lookAtPosition.y = point.y + normal.y;
+		Cursor.lookAtPosition.z = point.z + normal.z; 
+		Cursor.mesh.lookAt(Cursor.lookAtPosition); 
+		Cursor.mesh.scale.x = scale;
+		Cursor.mesh.scale.y = scale; 
+		Cursor.mesh.scale.z = scale; 
+	} else {
+		if(Cursor.mesh.parent === scene){
+			scene.remove(Cursor.mesh);
+		}
+	}
+}
+
 function Plotter(){}
 Plotter.mode = "complex";
 Plotter.flipComplex = false;
@@ -71,6 +142,7 @@ Plotter.bounds = {
 	min_x: -25.0, max_x: 25.0,
 };
 Plotter.quadSize = {x: 0.1, z: 0.1};
+Plotter.raycastTargets = [];
 Plotter.plot = function(expression){
 	try {
 		Plotter.expression = expression;	
@@ -88,7 +160,8 @@ Plotter.plot = function(expression){
 		// num steps
 		var numSteps = {};
 		numSteps.x = (Plotter.bounds.max_x-Plotter.bounds.min_x)/Plotter.quadSize.x+1;
-		numSteps.z = (Plotter.bounds.max_z-Plotter.bounds.min_z)/Plotter.quadSize.z+1;	
+		numSteps.z = (Plotter.bounds.max_z-Plotter.bounds.min_z)/Plotter.quadSize.z+1;
+		
 		// offset
 		var offset = {};
 		offset.x = Plotter.bounds.min_x;
@@ -101,6 +174,7 @@ Plotter.plot = function(expression){
 		Plotter.plotLine(numSteps, offset);	
 		Plotter.applyLineColor();
 		Plotter.applyAreaColor();
+		Plotter.updateRaycastTargets();
 	} catch(e){
 		console.error(e);
 		return false;
@@ -126,6 +200,14 @@ Plotter.applyAreaColor = function(hue){
 		Plotter.areaMesh.material.uniforms.hue_offset.value = Plotter.areaColor;
 	}
 }
+Plotter.updateRaycastTargets = function(){
+	Plotter.raycastTargets = [];
+	if(Plotter.showArea){
+		Plotter.raycastTargets.push(Plotter.areaMesh);
+	} else if(Plotter.showLine){
+	//	Plotter.raycastTargets.push(Plotter.lineMesh);		
+	}
+}
 
 Plotter.setShowLineWireframe = function(v){
 	if(v == Plotter.showLineWireframe) return;
@@ -135,6 +217,7 @@ Plotter.setShowLineWireframe = function(v){
 	} else if(!Plotter.showLineWireframe & Plotter.lineWireframe != null){
 		scene.remove(Plotter.lineWireframe);		
 	}
+	Plotter.updateRaycastTargets();
 }
 Plotter.setShowAreaWireframe = function(v){
 	if(v == Plotter.showAreaWireframe) return;
@@ -144,6 +227,7 @@ Plotter.setShowAreaWireframe = function(v){
 	} else if(!Plotter.showAreaWireframe & Plotter.areaWireframe != null){
 		scene.remove(Plotter.areaWireframe);		
 	}	
+	Plotter.updateRaycastTargets();
 }
 Plotter.setShowLine = function(v){
 	if(v == Plotter.showLine) return;
@@ -153,6 +237,7 @@ Plotter.setShowLine = function(v){
 	} else if(!Plotter.showLine & Plotter.lineMesh != null){
 		scene.remove(Plotter.lineMesh);		
 	}	
+	Plotter.updateRaycastTargets();
 }
 Plotter.setShowArea = function(v){
 	if(v == Plotter.showArea) return;
@@ -161,7 +246,8 @@ Plotter.setShowArea = function(v){
 		scene.add(Plotter.areaMesh);
 	} else if(!Plotter.showArea & Plotter.areaMesh != null){
 		scene.remove(Plotter.areaMesh);		
-	}	
+	}
+	Plotter.updateRaycastTargets();
 }
 Plotter.setMode = function(mode){
 	Plotter.mode = mode;	
