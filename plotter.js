@@ -136,22 +136,39 @@ Cursor.raycaster = new THREE.Raycaster();
 Cursor.mouse = new THREE.Vector2();
 Cursor.mesh = null;
 Cursor.lookAtPosition = new THREE.Vector3();
+Cursor.planes = {
+	xy: null,
+	xz: null,
+	yz:null,
+};
+Cursor.linesNode;
+Cursor.planesNode;
+Cursor.lines = [];
+Cursor.planes = [];
 Cursor.init = function(){	
 	var group = new THREE.Group();
 	var length = 1;
+	var arrlength = 0.5;
 	var geometry = new THREE.CylinderGeometry(0.25, 0.025, length, 8, 1);
-	var material = new THREE.MeshLambertMaterial({color:0xFF00FF});
+	var geometry2 = new THREE.CylinderGeometry(0.125, 0.125, arrlength, 8, 1);
+	var material = new THREE.MeshLambertMaterial({color:0xFFFFFF});
 	var axis;
 	// cone
 	// z-axis
-	axis = new THREE.Mesh(geometry, material);
+	var arrow1 = axis = new THREE.Mesh(geometry, material);
 	axis.position.z = -length/2;
 	axis.rotation.x = -Math.PI/2;
 	group.add(axis);
-/*	axis = new THREE.Mesh(geometry, material);
-	axis.position.z = length/2;
+	axis = new THREE.Mesh(geometry2, material);
+	axis.position.y = arrlength/2 + length/2;
+	arrow1.add(axis);
+	var arrow2 = axis = new THREE.Mesh(geometry, material);
+	axis.position.z = arrlength/2 + length/2;
 	axis.rotation.x = Math.PI/2;
-	group.add(axis); */
+	group.add(axis); 
+	axis = new THREE.Mesh(geometry2, material);
+	axis.position.y = arrlength;
+	arrow2.add(axis);
 	// x-axis
 /*	axis = new THREE.Mesh(geometry, material);
 	axis.position.x = length/2;
@@ -170,6 +187,43 @@ Cursor.init = function(){
 	axis.rotation.x = -Math.PI;
 	group.add(axis); */
 	Cursor.mesh = group;
+	
+	var linesDirs = [
+		new THREE.Vector3(1, 0, 0),
+		new THREE.Vector3(0, 1, 0),
+		new THREE.Vector3(0, 0, 1),
+		new THREE.Vector3(1, 0, 0),
+		new THREE.Vector3(0, 1, 0),
+		new THREE.Vector3(0, 0, 1),
+		new THREE.Vector3(1, 0, 0),
+		new THREE.Vector3(0, 1, 0),
+		new THREE.Vector3(0, 0, 1),
+	];
+	var linesNode = new THREE.Group();
+	var lineMaterial = new THREE.LineBasicMaterial({color: 0xffffff});
+	var lineMaterial2 = new THREE.LineBasicMaterial({color: 0xffffff});
+	for(var i = 0; i < linesDirs.length; i++){
+		var lineGeometry = new THREE.Geometry();
+		lineGeometry.vertices.push(new THREE.Vector3(0, 0, 0));
+		lineGeometry.vertices.push(linesDirs[i]);
+		var line = new THREE.Line(lineGeometry, i < 3 ? lineMaterial : lineMaterial2);
+	//	if(i == 1 || i == 4 | i == 7 || i == 2 | i == 0) linesNode.add(line);
+		if(i == 1 || i == 3 || i == 8) linesNode.add(line);
+	//	linesNode.add(line);
+		Cursor.lines[i] = line;
+	}
+	var planesNode = new THREE.Group();
+	var planeMaterial = new THREE.MeshLambertMaterial({color: 0xFFFFFF, side:THREE.DoubleSide});
+	for(var i = 0; i < 3; i++){
+		var planeGeometry = new THREE.PlaneGeometry(1,1);
+		var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+		Cursor.planes[i] = plane;
+		if(false) planesNode.add(plane);
+	}
+	Cursor.planes[0].rotation.y = Math.PI/2;
+	Cursor.planes[1].rotation.x = Math.PI/2;
+	Cursor.linesNode = linesNode;
+	Cursor.planesNode = planesNode;
 }
 Cursor.update = function(){
 	Cursor.mouse.x = Input.mouse.screenPosition.x / window.innerWidth*2 - 1;
@@ -181,12 +235,17 @@ Cursor.update = function(){
 		if(Cursor.mesh.parent !== scene){
 			scene.add(Cursor.mesh);
 		}
-		console.log(intersects[0]);
+		if(Cursor.linesNode.parent !== scene){
+			scene.add(Cursor.linesNode);
+		}
+		if(Cursor.planesNode.parent !== scene){
+			scene.add(Cursor.planesNode);
+		}
 		Cursor.mesh.position.x = point.x;
 		Cursor.mesh.position.y = point.y;
 		Cursor.mesh.position.z = point.z;
 		var distance = intersects[0].distance;
-		var scale = distance*0.05;
+		var scale = distance*0.0375;
 		var normal = intersects[0].face.normal;
 		Cursor.lookAtPosition.x = point.x + normal.x;
 		Cursor.lookAtPosition.y = point.y + normal.y;
@@ -195,9 +254,41 @@ Cursor.update = function(){
 		Cursor.mesh.scale.x = scale;
 		Cursor.mesh.scale.y = scale; 
 		Cursor.mesh.scale.z = scale; 
+		Cursor.linesNode.position.copy(point);
+		Cursor.lines[0].scale.x = -point.x;
+		Cursor.lines[1].scale.y = -point.y;
+		Cursor.lines[2].scale.z = -point.z;
+		Cursor.lines[3].scale.x = -point.x;
+		Cursor.lines[3].position.y = -point.y;
+		Cursor.lines[4].scale.y = -point.y;
+		Cursor.lines[4].position.x = -point.x;
+		Cursor.lines[5].scale.z = -point.z;
+		Cursor.lines[5].position.x = -point.x;
+		Cursor.lines[6].scale.x = -point.x;
+		Cursor.lines[6].position.z = -point.z;
+		Cursor.lines[7].scale.y = -point.y;
+		Cursor.lines[7].position.z = -point.z;
+		Cursor.lines[8].scale.z = -point.z;
+		Cursor.lines[8].position.y = -point.y;
+		Cursor.planes[0].scale.x = point.z;
+		Cursor.planes[0].scale.y = point.y;
+		Cursor.planes[0].position.set(point.x, point.y/2, point.z/2);
+		Cursor.planes[1].scale.x = point.x;
+		Cursor.planes[1].scale.y = point.z;
+		Cursor.planes[1].position.set(point.x/2, 0, point.z/2);
+		Cursor.planes[2].scale.x = point.x;
+		Cursor.planes[2].scale.y = point.y;
+		Cursor.planes[2].position.set(point.x/2, point.y/2, point.z);
+
 	} else {
 		if(Cursor.mesh.parent === scene){
 			scene.remove(Cursor.mesh);
+		}
+		if(Cursor.linesNode.parent === scene){
+			scene.remove(Cursor.linesNode);
+		}
+		if(Cursor.planesNode.parent === scene){
+			scene.remove(Cursor.planesNode);
 		}
 	}
 }
@@ -478,6 +569,7 @@ Plotter.plotArea = function(numSteps, offset){
 			polygonOffsetFactor: 1,
 			polygonOffsetUnits: 1,
 			lights: true,
+			transparent: true,
 		});
 	} else {
 		bufferGeometry = new THREE.BufferGeometry();
@@ -500,6 +592,7 @@ Plotter.plotArea = function(numSteps, offset){
 			polygonOffsetFactor: 1,
 			polygonOffsetUnits: 1,
 			lights: true,
+			transparent: true,
 		});		
 	}
 	bufferGeometry.setIndex(indices);

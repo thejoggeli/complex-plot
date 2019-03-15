@@ -166,7 +166,7 @@ void main() {
 
 	#include <envmap_fragment>
 	
-	gl_FragColor = vec4(outgoingLight, diffuseColor.a);
+	gl_FragColor = vec4(outgoingLight, 0.85);
 
 	#include <tonemapping_fragment>
 	#include <encodings_fragment>
@@ -382,7 +382,7 @@ void main() {
 
 	#include <envmap_fragment>
 	
-	gl_FragColor = vec4(outgoingLight, diffuseColor.a);
+	gl_FragColor = vec4(outgoingLight, 0.85);
 
 	#include <tonemapping_fragment>
 	#include <encodings_fragment>
