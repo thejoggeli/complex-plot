@@ -1,3 +1,13 @@
+#value-display {
+	font-size:12px;font-family:"VeraMono";color:black;
+	position:fixed;bottom:15px;left: 50%;width: auto;transform: translateX(-50%);background:#fffa;
+	font-weight:bold;padding:4px 8px;border-radius:5px;display:none;
+	z-index:60000;
+}
+#value-display .input {display:inline-block;}
+#value-display .output {display:inline-block;}
+
+
 #ui-1 {
 	font-size:12px;font-family:"VeraMono";color:white;
 	background:#fffa;border-radius:0 0 0 4px;

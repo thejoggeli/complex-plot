@@ -141,17 +141,24 @@ Cursor.planes = {
 	xz: null,
 	yz:null,
 };
+Cursor.$valueDisplay;
 Cursor.linesNode;
 Cursor.planesNode;
 Cursor.lines = [];
 Cursor.planes = [];
-Cursor.init = function(){	
+Cursor.frozen = false;
+Cursor.meshMaterial;
+Cursor.lineMaterial1;
+Cursor.lineMaterial2;
+Cursor.planeMaterial;
+Cursor.init = function(){	$
+	Cursor.$valueDisplay = $("#value-display");
 	var group = new THREE.Group();
 	var length = 1;
 	var arrlength = 0.5;
 	var geometry = new THREE.CylinderGeometry(0.25, 0.025, length, 8, 1);
 	var geometry2 = new THREE.CylinderGeometry(0.125, 0.125, arrlength, 8, 1);
-	var material = new THREE.MeshLambertMaterial({color:0xFFFFFF});
+	var material = Cursor.meshMaterial = new THREE.MeshLambertMaterial({color:0x00FFFF});
 	var axis;
 	// cone
 	// z-axis
@@ -200,8 +207,8 @@ Cursor.init = function(){
 		new THREE.Vector3(0, 0, 1),
 	];
 	var linesNode = new THREE.Group();
-	var lineMaterial = new THREE.LineBasicMaterial({color: 0xffffff});
-	var lineMaterial2 = new THREE.LineBasicMaterial({color: 0xffffff});
+	var lineMaterial = Cursor.lineMaterial1 = new THREE.LineBasicMaterial({color: 0x00ffff});
+	var lineMaterial2  = Cursor.lineMaterial2 = new THREE.LineBasicMaterial({color: 0x00ffff});
 	for(var i = 0; i < linesDirs.length; i++){
 		var lineGeometry = new THREE.Geometry();
 		lineGeometry.vertices.push(new THREE.Vector3(0, 0, 0));
@@ -213,7 +220,7 @@ Cursor.init = function(){
 		Cursor.lines[i] = line;
 	}
 	var planesNode = new THREE.Group();
-	var planeMaterial = new THREE.MeshLambertMaterial({color: 0xFFFFFF, side:THREE.DoubleSide});
+	var planeMaterial = Cursor.planeMaterial = new THREE.MeshLambertMaterial({color: 0xffffff, side:THREE.DoubleSide});
 	for(var i = 0; i < 3; i++){
 		var planeGeometry = new THREE.PlaneGeometry(1,1);
 		var plane = new THREE.Mesh(planeGeometry, planeMaterial);
@@ -225,70 +232,129 @@ Cursor.init = function(){
 	Cursor.linesNode = linesNode;
 	Cursor.planesNode = planesNode;
 }
+Cursor.unfreeze = function(){
+	if(!Cursor.frozen) return;
+	Cursor.frozen = false;
+	var color = 0x00FFFF;
+	Cursor.meshMaterial.color.setHex(color);
+	Cursor.lineMaterial1.color.setHex(color);
+	Cursor.lineMaterial2.color.setHex(color);
+}
+Cursor.freeze = function(){
+	if(Cursor.frozen) return;
+	Cursor.frozen = true;
+	var color = 0xFF00FF;
+	Cursor.meshMaterial.color.setHex(color);
+	Cursor.lineMaterial1.color.setHex(color);
+	Cursor.lineMaterial2.color.setHex(color);
+}
 Cursor.update = function(){
-	Cursor.mouse.x = Input.mouse.screenPosition.x / window.innerWidth*2 - 1;
-	Cursor.mouse.y = -Input.mouse.screenPosition.y / window.innerHeight*2 + 1;
-	Cursor.raycaster.setFromCamera(Cursor.mouse, camera);
-	var intersects = Cursor.raycaster.intersectObjects(Plotter.raycastTargets);
-	if(intersects.length > 0){
-		var point = intersects[0].point;
-		if(Cursor.mesh.parent !== scene){
-			scene.add(Cursor.mesh);
-		}
-		if(Cursor.linesNode.parent !== scene){
-			scene.add(Cursor.linesNode);
-		}
-		if(Cursor.planesNode.parent !== scene){
-			scene.add(Cursor.planesNode);
-		}
-		Cursor.mesh.position.x = point.x;
-		Cursor.mesh.position.y = point.y;
-		Cursor.mesh.position.z = point.z;
-		var distance = intersects[0].distance;
-		var scale = distance*0.0375;
-		var normal = intersects[0].face.normal;
-		Cursor.lookAtPosition.x = point.x + normal.x;
-		Cursor.lookAtPosition.y = point.y + normal.y;
-		Cursor.lookAtPosition.z = point.z + normal.z; 
-		Cursor.mesh.lookAt(Cursor.lookAtPosition); 
-		Cursor.mesh.scale.x = scale;
-		Cursor.mesh.scale.y = scale; 
-		Cursor.mesh.scale.z = scale; 
-		Cursor.linesNode.position.copy(point);
-		Cursor.lines[0].scale.x = -point.x;
-		Cursor.lines[1].scale.y = -point.y;
-		Cursor.lines[2].scale.z = -point.z;
-		Cursor.lines[3].scale.x = -point.x;
-		Cursor.lines[3].position.y = -point.y;
-		Cursor.lines[4].scale.y = -point.y;
-		Cursor.lines[4].position.x = -point.x;
-		Cursor.lines[5].scale.z = -point.z;
-		Cursor.lines[5].position.x = -point.x;
-		Cursor.lines[6].scale.x = -point.x;
-		Cursor.lines[6].position.z = -point.z;
-		Cursor.lines[7].scale.y = -point.y;
-		Cursor.lines[7].position.z = -point.z;
-		Cursor.lines[8].scale.z = -point.z;
-		Cursor.lines[8].position.y = -point.y;
-		Cursor.planes[0].scale.x = point.z;
-		Cursor.planes[0].scale.y = point.y;
-		Cursor.planes[0].position.set(point.x, point.y/2, point.z/2);
-		Cursor.planes[1].scale.x = point.x;
-		Cursor.planes[1].scale.y = point.z;
-		Cursor.planes[1].position.set(point.x/2, 0, point.z/2);
-		Cursor.planes[2].scale.x = point.x;
-		Cursor.planes[2].scale.y = point.y;
-		Cursor.planes[2].position.set(point.x/2, point.y/2, point.z);
-
-	} else {
-		if(Cursor.mesh.parent === scene){
-			scene.remove(Cursor.mesh);
-		}
-		if(Cursor.linesNode.parent === scene){
-			scene.remove(Cursor.linesNode);
-		}
-		if(Cursor.planesNode.parent === scene){
-			scene.remove(Cursor.planesNode);
+	if(Cursor.frozen){
+		if(Input.mouseDown()){
+			Cursor.mouse.x = Input.mouse.screenPosition.x / window.innerWidth*2 - 1;
+			Cursor.mouse.y = -Input.mouse.screenPosition.y / window.innerHeight*2 + 1;
+			var camera = getCamera();
+			Cursor.raycaster.setFromCamera(Cursor.mouse, camera);
+			var intersects = Cursor.raycaster.intersectObjects(Plotter.raycastTargets);
+			if(intersects.length > 0){
+				Cursor.unfreeze();				
+			}
+		}		
+	} else if(!Cursor.frozen){			
+		Cursor.mouse.x = Input.mouse.screenPosition.x / window.innerWidth*2 - 1;
+		Cursor.mouse.y = -Input.mouse.screenPosition.y / window.innerHeight*2 + 1;
+		var camera = getCamera();
+		Cursor.raycaster.setFromCamera(Cursor.mouse, camera);
+		var intersects = Cursor.raycaster.intersectObjects(Plotter.raycastTargets);
+		if(intersects.length > 0){
+			var point = intersects[0].point;
+			if(Cursor.mesh.parent !== scene){
+				scene.add(Cursor.mesh);
+				Cursor.$valueDisplay.show();
+			}
+			if(Cursor.linesNode.parent !== scene){
+				scene.add(Cursor.linesNode);
+			}
+			if(Cursor.planesNode.parent !== scene){
+				scene.add(Cursor.planesNode);
+			}
+			Cursor.mesh.position.x = point.x;
+			Cursor.mesh.position.y = point.y;
+			Cursor.mesh.position.z = point.z;
+			var distance = intersects[0].distance;
+			var scale = distance*0.0375;
+			var normal = intersects[0].face.normal;
+			Cursor.lookAtPosition.x = point.x + normal.x;
+			Cursor.lookAtPosition.y = point.y + normal.y;
+			Cursor.lookAtPosition.z = point.z + normal.z; 
+			Cursor.mesh.lookAt(Cursor.lookAtPosition); 
+			Cursor.mesh.scale.x = scale;
+			Cursor.mesh.scale.y = scale; 
+			Cursor.mesh.scale.z = scale; 
+			Cursor.linesNode.position.copy(point);
+			Cursor.lines[0].scale.x = -point.x;
+			Cursor.lines[1].scale.y = -point.y;
+			Cursor.lines[2].scale.z = -point.z;
+			Cursor.lines[3].scale.x = -point.x;
+			Cursor.lines[3].position.y = -point.y;
+			Cursor.lines[4].scale.y = -point.y;
+			Cursor.lines[4].position.x = -point.x;
+			Cursor.lines[5].scale.z = -point.z;
+			Cursor.lines[5].position.x = -point.x;
+			Cursor.lines[6].scale.x = -point.x;
+			Cursor.lines[6].position.z = -point.z;
+			Cursor.lines[7].scale.y = -point.y;
+			Cursor.lines[7].position.z = -point.z;
+			Cursor.lines[8].scale.z = -point.z;
+			Cursor.lines[8].position.y = -point.y;
+			Cursor.planes[0].scale.x = point.z;
+			Cursor.planes[0].scale.y = point.y;
+			Cursor.planes[0].position.set(point.x, point.y/2, point.z/2);
+			Cursor.planes[1].scale.x = point.x;
+			Cursor.planes[1].scale.y = point.z;
+			Cursor.planes[1].position.set(point.x/2, 0, point.z/2);
+			Cursor.planes[2].scale.x = point.x;
+			Cursor.planes[2].scale.y = point.y;
+			Cursor.planes[2].position.set(point.x/2, point.y/2, point.z);
+			var coord = new THREE.Vector3(point.x / Grid.scale.x, point.y / Grid.scale.y, point.z / Grid.scale.z);
+			var inputStr = "";
+			var outputStr = "";
+			if(Plotter.mode == "complex"){
+				inputStr = "f(" + roundToFixed(coord.x, 3) + " + " + roundToFixed(coord.z, 3) + "i)";
+				var ov1;
+				var ov2;
+				if(Plotter.flipComplex){
+					ov1 = Plotter.getColorValue(coord.x, coord.z);
+					ov2 = coord.y;
+				} else {	
+					ov1 = coord.y;
+					ov2 = Plotter.getColorValue(coord.x, coord.z); 
+				}
+				if(ov2 >= 0){
+					outputStr = roundToFixed(ov1, 3) + " + " + roundToFixed(ov2, 3) + "i";				
+				} else {
+					outputStr = roundToFixed(ov1, 3) + " - " + Math.abs(roundToFixed(ov2, 3)) + "i";				
+				}
+			} else {
+				inputStr = "f(" + roundToFixed(coord.x, 3) + ", " + roundToFixed(coord.z, 3) + ")";
+				outputStr = roundToFixed(coord.y, 3);
+			}
+			Cursor.$valueDisplay.find(".input").text(inputStr);
+			Cursor.$valueDisplay.find(".output").text(outputStr);
+			if(Input.mouseDown()){
+				Cursor.freeze();
+			}
+		} else {
+			if(Cursor.mesh.parent === scene){
+				scene.remove(Cursor.mesh);
+				Cursor.$valueDisplay.hide();
+			}
+			if(Cursor.linesNode.parent === scene){
+				scene.remove(Cursor.linesNode);
+			}
+			if(Cursor.planesNode.parent === scene){
+				scene.remove(Cursor.planesNode);
+			}
 		}
 	}
 }
@@ -315,6 +381,14 @@ Plotter.bounds = {
 };
 Plotter.quadSize = {x: 0.1, z: 0.1};
 Plotter.raycastTargets = [];
+Plotter.getColorValue = function(x, z){	
+	var result = Plotter.expression.eval({x:x, z:z});
+	if(result.re !== undefined){
+		return Plotter.flipComplex ? result.re : result.im;
+	} else {
+		return 0;
+	}
+}
 Plotter.plot = function(expression){
 	try {
 		Plotter.expression = expression;	
@@ -328,22 +402,24 @@ Plotter.plot = function(expression){
 		Plotter.lineWireframe = null;
 		Plotter.areaResults = [];
 		Plotter.lineResults = [];
-						
+		
+		Cursor.unfreeze();
+		
 		// num steps
 		var numSteps = {};
 		numSteps.x = (Plotter.bounds.max_x-Plotter.bounds.min_x)/Plotter.quadSize.x+1;
 		numSteps.z = (Plotter.bounds.max_z-Plotter.bounds.min_z)/Plotter.quadSize.z+1;
 		
 		// offset
-		var offset = {};
+		var offset = Plotter.offset = {};
 		offset.x = Plotter.bounds.min_x;
 		offset.z = Plotter.bounds.min_z;
-		Plotter.precalc(numSteps, offset);
+		Plotter.precalc(numSteps);
 		if(Plotter.mode == "real" && Plotter.resultIsComplex){
 			return false;
 		} 
-		Plotter.plotArea(numSteps, offset);		
-		Plotter.plotLine(numSteps, offset);	
+		Plotter.plotArea(numSteps);		
+		Plotter.plotLine(numSteps);	
 		Plotter.applyLineColor();
 		Plotter.applyAreaColor();
 		Plotter.updateRaycastTargets();
@@ -425,7 +501,8 @@ Plotter.setMode = function(mode){
 	Plotter.mode = mode;	
 }
 
-Plotter.precalc = function(numSteps, offset){
+Plotter.precalc = function(numSteps){
+	var offset = Plotter.offset;
 	Plotter.resultIsComplex = false;
 	Plotter.hasZ = false;
 	var ex = Plotter.expression;
@@ -438,7 +515,7 @@ Plotter.precalc = function(numSteps, offset){
 		ex = ex.replace(/z/g, "z*i");
 	}
 	ex = ex.toLowerCase();
-	const expr = math.compile(ex);
+	var expr = Plotter.expression = math.compile(ex);
 	var x, z, res;
 	for(var ix = 0; ix < numSteps.x; ix++){
 		Plotter.areaResults[ix] = [];
@@ -479,7 +556,8 @@ Plotter.precalc = function(numSteps, offset){
 	}
 }
 
-Plotter.plotArea = function(numSteps, offset){
+Plotter.plotArea = function(numSteps){
+	var offset = Plotter.offset;
 	var scale = Grid.scale;	
 	// plot
 	var vector_index = 0;
@@ -615,7 +693,8 @@ Plotter.plotArea = function(numSteps, offset){
 	Plotter.areaWireframe = wireframe;
 }
 
-Plotter.plotLine = function(numSteps, offset){	
+Plotter.plotLine = function(numSteps){	
+	var offset = Plotter.offset;
 	var scale = Grid.scale;	
 	// tube
 	var tubeGeometry = new THREE.Geometry();
@@ -682,4 +761,3 @@ Plotter.plotLine = function(numSteps, offset){
 	}
 	Plotter.lineWireframe = wireframe;
 }
-
