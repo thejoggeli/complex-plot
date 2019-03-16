@@ -1,4 +1,5 @@
 var scene, camera, orthoCamera, renderer;
+var cameraControls, orthoCameraControls;
 var cameraMode = "ortho";
 var plotMesh = null;
 var plotWireframe = null;
@@ -64,7 +65,7 @@ function init(){
 	camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 	camera.position.set(5,5,10);
 	camera.lookAt(new THREE.Vector3(0,0,0));
-	var controls = new THREE.OrbitControls(camera, Gfw.inputOverlay[0]);
+	cameraControls = new THREE.OrbitControls(camera, Gfw.inputOverlay[0]);
 	
 	// ortho
 	var w = window.innerWidth;
@@ -72,7 +73,7 @@ function init(){
 	orthoCamera	= new THREE.OrthographicCamera(-w/2, w/2, h/2, -h/2, -1000, 1000);
 	orthoCamera.position.set(5,5,10);
 	orthoCamera.lookAt(new THREE.Vector3(0,0,0));
-	var controls = new THREE.OrbitControls(orthoCamera, Gfw.inputOverlay[0]);
+	orthoCameraControls = new THREE.OrbitControls(orthoCamera, Gfw.inputOverlay[0]);
 	
 	// ambi light
     ambientLight = new THREE.AmbientLight(0xFFFFFF);
@@ -89,10 +90,19 @@ function init(){
 	MiniGrid.init();
 	Ui.beginPlot();
 	
+	setCameraMode("ortho");
+	
 }
 
 function setCameraMode(mode){
 	cameraMode = mode;
+	if(mode == "ortho"){
+		cameraControls.enabled = false;
+		orthoCameraControls.enabled = true;
+	} else {
+		cameraControls.enabled = true;
+		orthoCameraControls.enabled = false;
+	}
 }
 function getCamera(){
 	return cameraMode == "ortho" ? orthoCamera : camera;
@@ -102,6 +112,25 @@ function update(){
 	if(Input.keyDown(32)){
 		setCameraMode(cameraMode == "ortho" ? "perspective" : "ortho");
 	}
+/*	var snapDistance = 10;	
+	if(Input.keyDown(49)){
+		getCamera().position.set(0, 0, snapDistance);
+	}
+	if(Input.keyDown(50)){
+		getCamera().position.set(0, 0, -snapDistance);
+	}
+	if(Input.keyDown(51)){
+		getCamera().position.set(0, snapDistance, 0);
+	}
+	if(Input.keyDown(52)){
+		getCamera().position.set(0, -snapDistance, 0);
+	}
+	if(Input.keyDown(53)){
+		getCamera().position.set(snapDistance, 0, 0);
+	}
+	if(Input.keyDown(54)){
+		getCamera().position.set(-snapDistance, 0, 0);
+	} */
 	Cursor.update();
 	var camera = getCamera();
 	directionalLight.position.set(camera.position.x, camera.position.y, camera.position.z);

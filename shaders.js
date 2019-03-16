@@ -97,6 +97,7 @@ uniform float plot_y_range;
 
 vec3 hsl2rgb(vec3 hsl);
 uniform float hue_offset;
+uniform float area_opacity;
 
 void main() {
 
@@ -166,7 +167,7 @@ void main() {
 
 	#include <envmap_fragment>
 	
-	gl_FragColor = vec4(outgoingLight, 0.85);
+	gl_FragColor = vec4(outgoingLight, area_opacity);
 
 	#include <tonemapping_fragment>
 	#include <encodings_fragment>
@@ -312,6 +313,7 @@ uniform float min_plot_i;
 uniform float max_plot_i;
 uniform float plot_i_range;
 uniform float hue_offset;
+uniform float area_opacity;
 
 void main() {
 
@@ -382,7 +384,7 @@ void main() {
 
 	#include <envmap_fragment>
 	
-	gl_FragColor = vec4(outgoingLight, 0.85);
+	gl_FragColor = vec4(outgoingLight, area_opacity);
 
 	#include <tonemapping_fragment>
 	#include <encodings_fragment>

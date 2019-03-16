@@ -157,12 +157,12 @@ Cursor.init = function(){	$
 	var length = 1;
 	var arrlength = 0.5;
 	var geometry = new THREE.CylinderGeometry(0.25, 0.025, length, 8, 1);
-	var geometry2 = new THREE.CylinderGeometry(0.125, 0.125, arrlength, 8, 1);
+	var geometry2 = new THREE.CylinderGeometry(0.125, 0.125, arrlength, 24, 1);
 	var material = Cursor.meshMaterial = new THREE.MeshLambertMaterial({color:0x00FFFF});
 	var axis;
 	// cone
 	// z-axis
-	var arrow1 = axis = new THREE.Mesh(geometry, material);
+/*	var arrow1 = axis = new THREE.Mesh(geometry, material);
 	axis.position.z = -length/2;
 	axis.rotation.x = -Math.PI/2;
 	group.add(axis);
@@ -175,7 +175,13 @@ Cursor.init = function(){	$
 	group.add(axis); 
 	axis = new THREE.Mesh(geometry2, material);
 	axis.position.y = arrlength;
-	arrow2.add(axis);
+	arrow2.add(axis); */
+	var arrow1 = axis = new THREE.Mesh(geometry2, material);
+	axis.rotation.x = -Math.PI/2;
+	axis.scale.y = 0.01;
+	axis.scale.x = axis.scale.z = 0.1;
+//		axis.scale.z = 0.5;
+	group.add(axis);
 	// x-axis
 /*	axis = new THREE.Mesh(geometry, material);
 	axis.position.x = length/2;
@@ -237,29 +243,44 @@ Cursor.unfreeze = function(){
 	Cursor.frozen = false;
 	var color = 0x00FFFF;
 	Cursor.meshMaterial.color.setHex(color);
-	Cursor.lineMaterial1.color.setHex(color);
-	Cursor.lineMaterial2.color.setHex(color);
+//	Cursor.lineMaterial1.color.setHex(color);
+//	Cursor.lineMaterial2.color.setHex(color);
 }
 Cursor.freeze = function(){
 	if(Cursor.frozen) return;
 	Cursor.frozen = true;
 	var color = 0xFF00FF;
-	Cursor.meshMaterial.color.setHex(color);
-	Cursor.lineMaterial1.color.setHex(color);
-	Cursor.lineMaterial2.color.setHex(color);
+	Cursor.meshMaterial.color.setHex(0xFFFFFF);
+//	Cursor.lineMaterial1.color.setHex(color);
+//	Cursor.lineMaterial2.color.setHex(color);
+	var scale = 2.5;
+	Cursor.mesh.scale.x = scale;
+	Cursor.mesh.scale.y = scale;
+	Cursor.mesh.scale.z = scale;
 }
+Cursor.downPoint = new THREE.Vector3();
+Cursor.downPosition = {x:0, y:0};
 Cursor.update = function(){
 	if(Cursor.frozen){
 		if(Input.mouseDown()){
 			Cursor.mouse.x = Input.mouse.screenPosition.x / window.innerWidth*2 - 1;
 			Cursor.mouse.y = -Input.mouse.screenPosition.y / window.innerHeight*2 + 1;
-			var camera = getCamera();
-			Cursor.raycaster.setFromCamera(Cursor.mouse, camera);
-			var intersects = Cursor.raycaster.intersectObjects(Plotter.raycastTargets);
-			if(intersects.length > 0){
-				Cursor.unfreeze();				
+			Cursor.downPosition.x = Cursor.mouse.x;
+			Cursor.downPosition.y = Cursor.mouse.y;
+		}
+		if(Input.mouseUp()){
+			Cursor.mouse.x = Input.mouse.screenPosition.x / window.innerWidth*2 - 1;
+			Cursor.mouse.y = -Input.mouse.screenPosition.y / window.innerHeight*2 + 1;
+			if(Cursor.downPosition.x == Cursor.mouse.x && Cursor.downPosition.y == Cursor.mouse.y){
+			/*	var camera = getCamera();
+				Cursor.raycaster.setFromCamera(Cursor.mouse, camera);
+				var intersects = Cursor.raycaster.intersectObjects(Plotter.raycastTargets);
+				if(intersects.length > 0){
+					Cursor.unfreeze();	
+				} */				
+				Cursor.unfreeze();	
 			}
-		}		
+		}
 	} else if(!Cursor.frozen){			
 		Cursor.mouse.x = Input.mouse.screenPosition.x / window.innerWidth*2 - 1;
 		Cursor.mouse.y = -Input.mouse.screenPosition.y / window.innerHeight*2 + 1;
@@ -269,20 +290,20 @@ Cursor.update = function(){
 		if(intersects.length > 0){
 			var point = intersects[0].point;
 			if(Cursor.mesh.parent !== scene){
-				scene.add(Cursor.mesh);
+		//		scene.add(Cursor.mesh);
 				Cursor.$valueDisplay.show();
 			}
 			if(Cursor.linesNode.parent !== scene){
-				scene.add(Cursor.linesNode);
+		//		scene.add(Cursor.linesNode);
 			}
 			if(Cursor.planesNode.parent !== scene){
-				scene.add(Cursor.planesNode);
+		//		scene.add(Cursor.planesNode);
 			}
 			Cursor.mesh.position.x = point.x;
 			Cursor.mesh.position.y = point.y;
 			Cursor.mesh.position.z = point.z;
 			var distance = intersects[0].distance;
-			var scale = distance*0.0375;
+			var scale = cameraMode == "ortho" ? 1/camera.zoom : distance*0.1;
 			var normal = intersects[0].face.normal;
 			Cursor.lookAtPosition.x = point.x + normal.x;
 			Cursor.lookAtPosition.y = point.y + normal.y;
@@ -342,7 +363,10 @@ Cursor.update = function(){
 			Cursor.$valueDisplay.find(".input").text(inputStr);
 			Cursor.$valueDisplay.find(".output").text(outputStr);
 			if(Input.mouseDown()){
-				Cursor.freeze();
+				Cursor.downPoint.copy(point);
+			}
+			if(Input.mouseUp() && point.equals(Cursor.downPoint)){
+			//	Cursor.freeze();
 			}
 		} else {
 			if(Cursor.mesh.parent === scene){
@@ -422,6 +446,7 @@ Plotter.plot = function(expression){
 		Plotter.plotLine(numSteps);	
 		Plotter.applyLineColor();
 		Plotter.applyAreaColor();
+		Plotter.applyAreaOpacity();
 		Plotter.updateRaycastTargets();
 	} catch(e){
 		console.error(e);
@@ -443,9 +468,18 @@ Plotter.setAreaColor = function(hue){
 	Plotter.areaColor = hue;
 	Plotter.applyAreaColor();
 }
-Plotter.applyAreaColor = function(hue){
+Plotter.applyAreaColor = function(){
 	if(Plotter.areaMesh !== null){
 		Plotter.areaMesh.material.uniforms.hue_offset.value = Plotter.areaColor;
+	}
+}
+Plotter.setAreaOpacity = function(opacity){
+	Plotter.areaOpacity = opacity;
+	Plotter.applyAreaOpacity();
+}
+Plotter.applyAreaOpacity = function(){
+	if(Plotter.areaMesh !== null){
+		Plotter.areaMesh.material.uniforms.area_opacity.value = Plotter.areaOpacity;;
 	}
 }
 Plotter.updateRaycastTargets = function(){
@@ -636,6 +670,7 @@ Plotter.plotArea = function(numSteps){
 		uniforms["max_plot_y"] = {value:max_y};
 		uniforms["plot_y_range"] = {value:max_y-min_y};
 		uniforms["hue_offset"] = {value:Plotter.areaColor};
+		uniforms["area_opacity"] = {value:Plotter.areaOpacity};
 		material = new THREE.ShaderMaterial({
 			defines: {},
 			uniforms: uniforms,
@@ -659,6 +694,7 @@ Plotter.plotArea = function(numSteps){
 		uniforms["max_plot_i"] = {value:max_i};
 		uniforms["plot_i_range"] = {value:max_i-min_i};
 		uniforms["hue_offset"] = {value:Plotter.areaColor};
+		uniforms["area_opacity"] = {value:Plotter.areaOpacity};
 		material = new THREE.ShaderMaterial({
 			defines: {},
 			uniforms: uniforms,

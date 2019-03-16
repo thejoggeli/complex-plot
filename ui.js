@@ -46,11 +46,18 @@ Ui.init = function(){
 		Plotter.setAreaColor($(this).val());
 		Ui.toCookie();		
 	});
+	$(".area-opacity").on("change", function(){
+		Plotter.setAreaOpacity($(this).val());
+		Ui.toCookie();		
+	});
 	$(".line-color").on("input", function(){
 		Plotter.setLineColor($(this).val());
 	});
 	$(".area-color").on("input", function(){
 		Plotter.setAreaColor($(this).val());
+	});
+	$(".area-opacity").on("input", function(){
+		Plotter.setAreaOpacity($(this).val());
 	});
 	$(".plot-real").on("click", function(){
 		$(".plot-real").addClass("active");
@@ -93,6 +100,7 @@ Ui.updateValues = function(){
 	}
 	$(".line-color").val(Plotter.lineColor);
 	$(".area-color").val(Plotter.areaColor);
+	$(".area-opacity").val(Plotter.areaOpacity);
 	$(".line-width").val(Plotter.lineWidth);
 	$(".line-min-x").val(Plotter.bounds.min_x);
 	$(".line-max-x").val(Plotter.bounds.max_x);
@@ -135,6 +143,7 @@ Ui.applyValues = function(){
 	Plotter.bounds.max_z = parseFloat($("input.max-z").val());
 	Plotter.setLineColor($(".line-color").val());
 	Plotter.setAreaColor($(".area-color").val());
+	Plotter.setAreaOpacity($(".area-opacity").val());
 	Plotter.bounds.max_z = parseFloat($("input.max-z").val());
 	Grid.scale.x = parseFloat($("input.x-scale").val());
 	Grid.scale.y = parseFloat($("input.y-scale").val());
