@@ -369,6 +369,9 @@ Cursor.update = function(){
 			//	Cursor.freeze();
 			}
 		} else {
+			if(Cursor.$valueDisplay.is(":visible")){
+				Cursor.$valueDisplay.hide();
+			}
 			if(Cursor.mesh.parent === scene){
 				scene.remove(Cursor.mesh);
 				Cursor.$valueDisplay.hide();
