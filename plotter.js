@@ -115,7 +115,7 @@ MiniGrid.update = function(){
 /*	MiniGrid.mesh.rotation.x = camera.rotation.x;
 	MiniGrid.mesh.rotation.y = camera.rotation.y;
 	MiniGrid.mesh.rotation.z = camera.rotation.z; */
-	MiniGrid.mesh.quaternion.copy(camera.quaternion);
+	MiniGrid.mesh.quaternion.copy(getCamera().quaternion);
 	MiniGrid.mesh.quaternion.inverse();
 }
 MiniGrid.render = function(){
